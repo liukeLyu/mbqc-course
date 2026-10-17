@@ -17,21 +17,18 @@ shows something extra: mid-circuit measurements with feedforward (`pennylane.ftq
 ## The code
 
 * `mbqc/state.py`: a state-vector simulator with **named qubits** (an array with one axis per qubit). Measuring removes the axis.
-* `mbqc/patterns.py`: the `PauliFrame` (four lines of byproduct bookkeeping), the 1D wire, the CNOT patch, and the compiler.
+* `mbqc/patterns.py`: the Pauli frame (byproduct bookkeeping), the 1D wire, the CNOT patch, and a circuit-to-pattern compiler.
 * `mbqc/noise.py`: dephasing, negativity, fusion, GKP shift errors.
 
 The central formula of the whole course (lesson 2): measuring qubit 1 of $CZ|\psi\rangle|+\rangle$ at angle $\theta$ with outcome $s$ leaves
 $X^s\,H\,P(-\theta)\,|\psi\rangle$ on qubit 2.
 
-## Run it
+## Install
 
 ```bash
 pip install -e ".[notebooks,test]"
-pytest              # fast tests (about 3 s)
-pytest -m slow      # also executes every notebook (about 40 s)
+pytest
 ```
-
-Tested with Python 3.13, NumPy 2.5, PennyLane 0.45.
 
 ## References
 
