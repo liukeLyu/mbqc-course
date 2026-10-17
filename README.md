@@ -1,11 +1,12 @@
 # mbqc-course
 
 A short course on **measurement-based quantum computation (MBQC)**, taught through small, readable NumPy code.
-Six notebooks, each starting from the intuition and then checking it numerically. PennyLane appears only where it
+Six notebooks, each starting from the intuition and then checking it numerically, plus a short lesson 0 for newcomers. PennyLane appears only where it
 shows something extra: mid-circuit measurements with feedforward (`pennylane.ftqc`).
 
 | # | Notebook | What you learn |
 |---|----------|----------------|
+| 0 | [Start here](notebooks/00_start_here.ipynb) | For newcomers: the idea of computing by measuring, one measurement as a gate, any single-qubit gate on a wire |
 | 1 | [Graph states](notebooks/01_graph_states.ipynb) | $\vert+\rangle$ + CZ on edges, stabilizers $K_a = X_a\prod Z_b$, cut entanglement, Z measurements delete vertices |
 | 2 | [Teleportation and feedforward](notebooks/02_teleportation_and_feedforward.ipynb) | One measurement moves a qubit and applies $J(\theta)=HP(-\theta)$; byproducts and why the next angle flips sign |
 | 3 | [Single-qubit rotations](notebooks/03_single_qubit_rotations.ipynb) | Any $U$ on a 5-qubit wire via $XZX$ Euler angles; all 16 outcome branches checked |
