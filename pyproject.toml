@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "A short course on measurement-based quantum computation, taught through readable NumPy code"
 authors = [{ name = "Liuke Lyu" }]
 requires-python = ">=3.10"
+license = "MIT"
 dependencies = ["numpy"]
 
 [project.optional-dependencies]
