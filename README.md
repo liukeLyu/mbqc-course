@@ -1,5 +1,7 @@
 # mbqc-course
 
+*Why I built this.* I work on multipartite entanglement, and measurement-based quantum computation is where that entanglement becomes the computer itself: prepare a highly entangled graph state, then compute only by measuring. I knew the slogan but not how it actually works, byproducts and all. These notebooks are how I taught it to myself, one small numerical check at a time.
+
 A short course on **measurement-based quantum computation (MBQC)**, taught through small, readable NumPy code.
 Six notebooks, each starting from the intuition and then checking it numerically, plus a short lesson 0 for newcomers. PennyLane appears only where it
 shows something extra: mid-circuit measurements with feedforward (`pennylane.ftqc`).
