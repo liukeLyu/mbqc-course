@@ -32,7 +32,9 @@ class PauliFrame:
     def teleport(self, src, dst, s):
         """Measuring src (outcome s) moved the logical state to dst, applying J.
 
-        J X^x Z^z = Z^x X^z J (up to phase), and the measurement adds X^s.
+        J((-1)^x theta) X^x Z^z = Z^x X^z J(theta) (up to phase), so this holds only when src
+        was measured at `angle(src, theta)`; the measurement then adds X^s.  Unflipped, an X
+        gives J(theta) X = Z J(-theta): a wrong rotation, not a Pauli.
         """
         x, z = self.x[src], self.z[src]
         del self.x[src], self.z[src]
