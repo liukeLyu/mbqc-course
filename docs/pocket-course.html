@@ -203,12 +203,25 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <article data-unit="0" data-title="One measurement is a gate">
 <p>How can measuring one qubit apply a gate to another? Take just two qubits. Put any state \(|\psi\rangle\) on qubit 0 and \(|+\rangle\) on qubit 1, apply one CZ, then measure qubit 0 in a basis on the equator of the Bloch sphere. (Every single-qubit state is a point on a unit sphere, given by its <em>Bloch vector</em> \((\langle X\rangle, \langle Y\rangle, \langle Z\rangle)\): \(|0\rangle\) and \(|1\rangle\) are the poles, and the equator holds the states with \(\langle Z\rangle = 0\).) The basis at angle \(\theta\) is</p>
 <div class="math">\(|\pm_\theta\rangle = \tfrac{1}{\sqrt2}\left(|0\rangle \pm e^{i\theta}|1\rangle\right)\)</div>
-<p>The outcome is \(s = 0\) for \(+\) and \(s = 1\) for \(-\). Angle \(\theta = 0\) is the X basis, \(\theta = \pi/2\) the Y basis. Qubit 0 is gone after the measurement, and qubit 1 now holds</p>
+<p>The outcome is \(s = 0\) for \(+\) and \(s = 1\) for \(-\). Angle \(\theta = 0\) is the X basis, \(\theta = \pi/2\) the Y basis.</p>
 <div class="tn" data-d="basic_move"></div>
-<div class="math">\(X^s\, J(\theta)\,|\psi\rangle\)</div>
-<div class="math">\(J(\theta) = H\,P(-\theta) = \tfrac{1}{\sqrt2}\begin{pmatrix} 1 &amp; e^{-i\theta} \\ 1 &amp; -e^{-i\theta}\end{pmatrix}\)</div>
-<p>Here \(H\) is the Hadamard gate and \(P(\phi) = \mathrm{diag}(1, e^{i\phi})\) is the phase gate. So the state <strong>moved</strong> to qubit 1 and was <strong>rotated</strong> by a gate you chose through \(\theta\). The extra \(X\) when \(s = 1\) is a known <em>byproduct</em>. MBQC has no gates to undo it on the spot, so it is only kept track of (Part 2), and all byproducts are undone once, on the output, at the end.</p>
-<p>Each outcome has probability 1/2, whatever \(|\psi\rangle\) is. So the measurement learns nothing about the state being processed: the information is passed on, not read out.</p>
+<p>Follow the state through, writing \(|\psi\rangle = a|0\rangle + b|1\rangle\) (qubit 0 first in each ket). Before the CZ:</p>
+<div class="math">\(|\psi\rangle|+\rangle = a|0\rangle|+\rangle + b|1\rangle|+\rangle\)</div>
+<p>The CZ applies \(Z\) to qubit 1 only where qubit 0 is \(|1\rangle\), and \(Z|+\rangle = |-\rangle\):</p>
+<div class="math">\(\mathrm{CZ}\,|\psi\rangle|+\rangle = a|0\rangle|+\rangle + b|1\rangle|-\rangle\)</div>
+<p>Measuring qubit 0 with outcome \(+\) applies the bra \(\langle +_\theta|\) to qubit 0. It gives \(\langle +_\theta|0\rangle = 1/\sqrt2\) and \(\langle +_\theta|1\rangle = e^{-i\theta}/\sqrt2\) (the bra conjugates \(e^{i\theta}\)), so qubit 1 is left with</p>
+<div class="math">\(\tfrac{1}{\sqrt2}\big(a|+\rangle + e^{-i\theta} b|-\rangle\big)\)</div>
+<p>Now use \(|+\rangle = H|0\rangle\) and \(|-\rangle = H|1\rangle\) to pull out an \(H\):</p>
+<div class="math">\(= \tfrac{1}{\sqrt2}\,H\big(a|0\rangle + e^{-i\theta} b|1\rangle\big)\)</div>
+<div class="math">\(= \tfrac{1}{\sqrt2}\,H\,P(-\theta)\,|\psi\rangle\)</div>
+<p>Here \(H\) is the Hadamard gate and \(P(\phi) = \mathrm{diag}(1, e^{i\phi})\) is the phase gate, which multiplies the \(|1\rangle\) part by \(e^{i\phi}\). Outcome \(-\) is the same with \(\langle -_\theta|1\rangle = -e^{-i\theta}/\sqrt2\), so the \(b\) term changes sign: that is an extra \(Z\), and \(HZ = XH\) turns it into an \(X\) in front:</p>
+<div class="math">\(\tfrac{1}{\sqrt2}\,H Z P(-\theta)|\psi\rangle\)</div>
+<div class="math">\(= \tfrac{1}{\sqrt2}\,X H P(-\theta)|\psi\rangle\)</div>
+<p>Both outcomes together: qubit 0 is gone, and after normalizing, qubit 1 holds</p>
+<div class="math">\(X^s\, J(\theta)\,|\psi\rangle, \quad J(\theta) = H\,P(-\theta)\)</div>
+<div class="math">\(J(\theta) = \tfrac{1}{\sqrt2}\begin{pmatrix} 1 &amp; e^{-i\theta} \\ 1 &amp; -e^{-i\theta}\end{pmatrix}\)</div>
+<p>So the state <strong>moved</strong> to qubit 1 and was <strong>rotated</strong> by a gate you chose through \(\theta\). The extra \(X\) when \(s = 1\) is a known <em>byproduct</em>. MBQC has no gates to undo it on the spot, so it is only kept track of (Part 2), and all byproducts are undone once, on the output, at the end.</p>
+<p>The probability of each outcome is the squared norm of what is left. That is \((1/\sqrt2)^2 = 1/2\) for both, whatever \(a\) and \(b\) are, because \(H P(-\theta)\) is unitary. So the measurement learns nothing about the state being processed: the information is passed on, not read out.</p>
 <p>To compare two states we use the <em>fidelity</em> \(|\langle\phi|\psi\rangle|^2\): 1 means identical (up to a global phase), 0 means orthogonal.</p>
 <div class="data"><b>Your data</b>50 angles from 0 to \(2\pi\), a random \(|\psi\rangle\): the fidelity with \(J(\theta)|\psi\rangle\) is 1 for \(s = 0\), and 1 for \(s = 1\) once the \(X\) is undone. Notebook 0.</div>
 <p class="code">In the code: <code>state.cz(0, 1); state.measure_xy(0, theta)</code>, and <code>mbqc.J(theta)</code>.</p>
@@ -282,7 +295,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 </article>
 
 <article data-unit="2" data-title="The central calculation">
-<p>Where does the basic move of "One measurement is a gate" come from? This is the calculation everything else repeats.</p>
+<p>Why does the basic move of "One measurement is a gate" work? Here is its calculation once more, compactly, since everything else repeats it.</p>
 <p>Write \(|\psi\rangle = a|0\rangle + b|1\rangle\) on qubit 0. The CZ leaves the \(|0\rangle\) part alone and applies \(Z\) to qubit 1 in the \(|1\rangle\) part, turning \(|+\rangle\) into \(|-\rangle\):</p>
 <div class="math">\(\mathrm{CZ}\,|\psi\rangle|+\rangle = a|0\rangle|+\rangle + b|1\rangle|-\rangle\)</div>
 <p>Now project qubit 0 onto \(\langle\pm_\theta| = (\langle 0| \pm e^{-i\theta}\langle 1|)/\sqrt2\). Qubit 1 is left in (unnormalized)</p>
