@@ -6,6 +6,8 @@ A short course on **measurement-based quantum computation (MBQC)**, taught throu
 Six notebooks, each starting from the intuition and then checking it numerically, plus a short lesson 0 for newcomers. PennyLane appears only where it
 shows something extra: mid-circuit measurements with feedforward (`pennylane.ftqc`).
 
+On a phone? The [pocket course](docs/pocket-course.html) covers the same seven notebooks (parts 0–6) in 32 two-minute lessons, with the numbers these notebooks produce.
+
 | # | Notebook | What you learn |
 |---|----------|----------------|
 | 0 | [Start here](notebooks/00_start_here.ipynb) | For newcomers: the idea of computing by measuring, one measurement as a gate, any single-qubit gate on a wire |

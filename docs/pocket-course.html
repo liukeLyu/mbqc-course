@@ -1,0 +1,845 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MBQC Pocket Course</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one narrow reading column; a home list of lessons, and one lesson at a time with a sticky bar. */
+:root {
+  --bg: #f3f6f8;
+  --paper: #ffffff;
+  --ink: #15232d;
+  --muted: #5a6b76;
+  --line: #d6e0e6;
+  --accent: #0d6f7d;
+  --accent-soft: #e0f0f2;
+  --done: #2f7a3e;
+  --data: #7a4a0d;
+  --data-soft: #fbf1e2;
+  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f171c; --paper: #16222a; --ink: #e3ecf0; --muted: #93a6b1; --line: #2a3a44;
+    --accent: #5cc3cf; --accent-soft: #173a40; --done: #79c788; --data: #e8b56a; --data-soft: #2e2416;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f171c; --paper: #16222a; --ink: #e3ecf0; --muted: #93a6b1; --line: #2a3a44;
+  --accent: #5cc3cf; --accent-soft: #173a40; --done: #79c788; --data: #e8b56a; --data-soft: #2e2416;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 18px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 640px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.2; margin: 0; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--accent-soft); padding: 0.05em 0.3em; border-radius: 4px; overflow-wrap: anywhere; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Home */
+.hero { padding-block: 28px 8px; display: grid; gap: 10px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font-size: 34px; }
+.hero p { margin: 0; color: var(--muted); }
+.progress { display: grid; gap: 6px; margin-top: 8px; }
+.bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--accent); width: 0; transition: width 0.3s; }
+.progress small { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.continue { margin-top: 10px; background: var(--accent); color: var(--paper); border: 0; border-radius: 12px; padding: 14px 18px; text-align: left; font-family: var(--display); font-weight: 700; font-size: 17px; }
+.continue span { display: block; font-family: var(--body); font-weight: 400; font-size: 15px; opacity: 0.9; }
+.unit { margin-top: 28px; display: grid; gap: 4px; }
+.unit h2 { font-size: 15px; font-family: var(--mono); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.unit p.blurb { margin: 4px 0 6px; font-size: 15px; color: var(--muted); }
+.row { display: grid; grid-template-columns: 2.2em 1fr auto; align-items: center; gap: 10px; width: 100%; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 12px 2px; text-align: left; color: var(--ink); }
+.row .n { font-family: var(--mono); font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.row .t { font-family: var(--display); font-weight: 500; font-size: 17px; line-height: 1.3; min-width: 0; }
+.row .mark { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 13px; color: var(--paper); }
+.row.is-done .mark { background: var(--done); border-color: var(--done); }
+.row.is-done .mark::after { content: "✓"; }
+.foot { margin-top: 32px; font-size: 15px; color: var(--muted); }
+.linkbtn { background: none; border: 0; color: var(--accent); text-decoration: underline; padding: 0; font-size: 15px; }
+
+/* Lesson view */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; border-bottom: 1px solid var(--line); }
+.topbar button { background: none; border: 0; color: var(--accent); font-family: var(--display); font-weight: 500; font-size: 16px; padding: 6px 0; }
+.topbar .pos { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lesson { padding-block: 18px 8px; display: grid; gap: 14px; }
+.stepper { padding: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; }
+.chip rect { fill: var(--accent-soft); stroke: none; }
+.chip text { font-family: var(--mono); font-size: 11px; fill: var(--accent); }
+.chip.old rect { fill: none; stroke: var(--muted); stroke-dasharray: 3 3; }
+.chip.old text { fill: var(--muted); }
+.chip.new rect { fill: var(--accent); }
+.chip.new text { fill: var(--paper); font-weight: 700; }
+.tn-node.gone > * { fill: none; stroke: var(--line); stroke-dasharray: 3 3; }
+.tn-line.gone { stroke: var(--line); stroke-dasharray: 3 3; }
+.stepper .pic { margin-bottom: 8px; }
+.stepper .cap { min-height: 7.5em; margin: 10px 0 8px; font-size: 15px; }
+.stepper .ctl { display: flex; gap: 8px; align-items: center; }
+.stepper .ctl button { border: 1px solid var(--accent); background: var(--paper); color: var(--accent); border-radius: 8px; padding: 6px 12px; font-size: 15px; }
+.stepper .ctl .n { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.stepper .key { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.lesson .unitname { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.lesson h2 { font-size: 27px; }
+.lesson p { margin: 0; }
+.lesson ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.math { overflow-x: auto; overflow-y: hidden; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; text-align: center; }
+.data { background: var(--data-soft); border-radius: 10px; padding: 12px 14px; font-size: 16px; }
+.data b { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--data); display: block; margin-bottom: 2px; }
+.code { font-size: 15px; color: var(--muted); }
+pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; overflow-x: auto; margin: 0; }
+.check { border: 2px solid var(--accent-soft); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.check .q { font-weight: 600; }
+.check .q::before { content: "Quick check  "; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); display: block; font-weight: 400; }
+.check button { justify-self: start; background: var(--accent-soft); color: var(--accent); border: 0; border-radius: 8px; padding: 8px 14px; font-family: var(--display); font-weight: 500; font-size: 15px; }
+.check .a { border-top: 1px dashed var(--line); padding-top: 8px; }
+.cite { font-size: 15px; color: var(--muted); }
+.nav { display: flex; gap: 10px; margin-top: 10px; }
+.nav button { flex: 1; border-radius: 12px; padding: 14px; font-family: var(--display); font-weight: 700; font-size: 16px; border: 2px solid var(--accent); }
+.nav .prev { background: none; color: var(--accent); flex: 0 0 auto; padding-inline: 18px; }
+.nav .next { background: var(--accent); color: var(--paper); }
+.tn { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; }
+.tn svg { max-width: 100%; height: auto; display: inline-block; }
+.plot { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; }
+.plot svg { max-width: 100%; height: auto; }
+.lesson table { border-collapse: collapse; font-size: 14px; width: 100%; font-variant-numeric: tabular-nums; }
+.lesson th, .lesson td { border-bottom: 1px solid var(--line); padding: 5px 4px; text-align: left; }
+.lesson th { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--muted); }
+.plot .grid { stroke: var(--line); stroke-width: 1; }
+.plot .axis { stroke: var(--muted); stroke-width: 1; }
+.plot .tick { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.plot .lab { font-family: var(--mono); font-size: 12px; fill: var(--ink); }
+.plot .fit { stroke: var(--data); stroke-width: 2; stroke-linecap: round; }
+.plot .pt { fill: var(--accent); stroke: var(--paper); stroke-width: 1; }
+.plot .cap { font-size: 13px; color: var(--muted); margin: 4px 6px 0; text-align: left; }
+.tn-line { stroke: var(--ink); stroke-width: 1.6; fill: none; stroke-linecap: round; }
+.tn-line.thick { stroke-width: 3.6; }
+.tn-node > * { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; }
+.tn-node.soft > * { fill: var(--accent-soft); }
+.tn-node.accent > * { fill: var(--accent); stroke: var(--accent); }
+.tn-label { font-family: var(--mono); font-size: 12px; fill: var(--ink); }
+.tn-label.tight { font-size: 9.5px; }
+.tn-label.on-accent { fill: var(--paper); font-weight: 600; }
+.tn-idx { font-family: var(--body); font-style: italic; font-size: 12px; fill: var(--muted); }
+.tn-text { font-family: var(--body); font-size: 20px; fill: var(--ink); }
+.tn-text.small { font-size: 12.5px; fill: var(--muted); }
+.tn-box { fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 4 4; }
+.tn-boxlabel { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.tn-box.new { stroke: var(--accent); stroke-width: 2; stroke-dasharray: none; }
+.tn-boxlabel.new { fill: var(--accent); font-weight: 700; }
+.tn-node.centre > * { fill: var(--data-soft); stroke: var(--data); }
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+</style>
+
+<div class="wrap">
+
+<section id="home">
+  <div class="hero">
+    <div class="eyebrow">Companion to mbqc-course</div>
+    <h1>MBQC Pocket Course</h1>
+    <p><span id="nLessons">Thirty-two</span> short lessons, about two minutes each, from "can a computer run on measurements alone?" to fusion, noise and GKP qubits in photonic hardware. Each one ends with a quick check you can do in your head. The amber boxes show numbers you get by running the code and notebooks in <code>mbqc-course</code>.</p>
+    <div class="progress">
+      <div class="bar"><span id="bar"></span></div>
+      <small id="count">0 lessons done</small>
+    </div>
+    <button class="continue" id="continue" type="button">Start with lesson 1<span>Computing by measuring</span></button>
+  </div>
+  <div id="units"></div>
+  <p class="foot">Your progress is saved in this browser only. <button class="linkbtn" id="reset" type="button">Clear progress</button><span id="resetConfirm" hidden> Clear all ticks? <button class="linkbtn" id="resetYes" type="button">Yes, clear</button> · <button class="linkbtn" id="resetNo" type="button">Keep</button></span></p>
+</section>
+
+<section id="reader" hidden>
+  <div class="topbar">
+    <button type="button" id="back">← All lessons</button>
+    <span class="pos" id="pos"></span>
+  </div>
+  <div id="stage"></div>
+  <div class="nav">
+    <button class="prev" type="button" id="prev">←</button>
+    <button class="next" type="button" id="next">Got it, next →</button>
+  </div>
+</section>
+
+<!-- Lessons. data-unit groups them; each needs data-title. -->
+<div id="lessons" hidden>
+
+<article data-unit="0" data-title="Computing by measuring">
+<p>Can a quantum computer run with no gates at all during the computation, only single-qubit measurements? Yes, as long as it starts from the right entangled state. That is <em>measurement-based quantum computation</em> (MBQC), and this course builds it from scratch.</p>
+<p>MBQC reorganizes the circuit model into three steps:</p>
+<ul>
+<li><strong>Make a large entangled resource state once.</strong> It is always the same state, whatever the problem. The standard choice is a <em>cluster state</em>: qubits on a grid, each prepared in \(|+\rangle\), with a controlled-Z (CZ) gate across every edge.</li>
+<li><strong>Compute by measuring qubits one at a time</strong>, each in a basis of your choice. The program is the list of measurement angles.</li>
+<li><strong>Adapt.</strong> Outcomes are random, so later angles depend on earlier outcomes. This is called <em>feedforward</em>.</li>
+</ul>
+<p><strong>The entanglement is the fuel and the measurements burn it.</strong></p>
+<p>Why bother? For photons, a two-qubit gate between two flying qubits is very hard, but making small entangled states, interfering them and measuring is natural. Photonic quantum computers, such as Xanadu's design, are measurement-based for that reason.</p>
+<p class="cite">Raussendorf and Briegel, <a href="https://arxiv.org/abs/quant-ph/0010033">arXiv:quant-ph/0010033</a>; <a href="https://doi.org/10.1103/PhysRevLett.86.5188">PRL 86, 5188 (2001)</a>. Bourassa et al., <a href="https://arxiv.org/abs/2010.02905">arXiv:2010.02905</a>; <a href="https://doi.org/10.22331/q-2021-02-04-392">Quantum 5, 392 (2021)</a>.</p>
+<div class="check"><p class="q">In a circuit, the program is the list of gates. What is the program in MBQC?</p><button type="button">Show answer</button><p class="a" hidden>The list of measurement angles (plus the rule for adapting them to earlier outcomes). The resource state is the same for every program.</p></div>
+</article>
+
+<article data-unit="0" data-title="The cluster state">
+<p>What does the resource state look like? It is easiest to read as a graph. Each dot is a qubit in \(|+\rangle = (|0\rangle + |1\rangle)/\sqrt2\). Each line is a CZ gate applied between the two qubits it joins.</p>
+<div class="tn" data-d="cluster35"></div>
+<p>CZ flips the sign of the amplitude when both qubits are 1, and does nothing otherwise:</p>
+<div class="math">\(\mathrm{CZ}\,|ab\rangle = (-1)^{ab}\,|ab\rangle\)</div>
+<p>All CZ gates are diagonal, so they commute: the order in which you apply them does not matter. The whole state is fixed by the picture.</p>
+<p>Making this state is the only entangling step in the whole computation. Everything after it is single-qubit measurements. Part 1 looks at this state in detail: its stabilizers, how much entanglement it carries, and how to cut it into shape.</p>
+<p class="code">In the code: <code>mbqc.graph_state(nodes, grid_edges(3, 5))</code>.</p>
+<div class="check"><p class="q">How many CZ gates make the 3 × 5 cluster in the picture?</p><button type="button">Show answer</button><p class="a" hidden>22: each of the 3 rows has 4 horizontal edges (12), and each of the 5 columns has 2 vertical edges (10).</p></div>
+</article>
+
+<article data-unit="0" data-title="One measurement is a gate">
+<p>How can measuring one qubit apply a gate to another? Take just two qubits. Put any state \(|\psi\rangle\) on qubit 0 and \(|+\rangle\) on qubit 1, apply one CZ, then measure qubit 0 in a basis on the equator of the Bloch sphere. (Every single-qubit state is a point on a unit sphere, given by its <em>Bloch vector</em> \((\langle X\rangle, \langle Y\rangle, \langle Z\rangle)\): \(|0\rangle\) and \(|1\rangle\) are the poles, and the equator holds the states with \(\langle Z\rangle = 0\).) The basis at angle \(\theta\) is</p>
+<div class="math">\(|\pm_\theta\rangle = \tfrac{1}{\sqrt2}\left(|0\rangle \pm e^{i\theta}|1\rangle\right)\)</div>
+<p>The outcome is \(s = 0\) for \(+\) and \(s = 1\) for \(-\). Angle \(\theta = 0\) is the X basis, \(\theta = \pi/2\) the Y basis. Qubit 0 is gone after the measurement, and qubit 1 now holds</p>
+<div class="tn" data-d="basic_move"></div>
+<div class="math">\(X^s\, J(\theta)\,|\psi\rangle\)</div>
+<div class="math">\(J(\theta) = H\,P(-\theta) = \tfrac{1}{\sqrt2}\begin{pmatrix} 1 &amp; e^{-i\theta} \\ 1 &amp; -e^{-i\theta}\end{pmatrix}\)</div>
+<p>Here \(H\) is the Hadamard gate and \(P(\phi) = \mathrm{diag}(1, e^{i\phi})\) is the phase gate. So the state <strong>moved</strong> to qubit 1 and was <strong>rotated</strong> by a gate you chose through \(\theta\). The extra \(X\) when \(s = 1\) is a known <em>byproduct</em>. MBQC has no gates to undo it on the spot, so it is only kept track of (Part 2), and all byproducts are undone once, on the output, at the end.</p>
+<p>Each outcome has probability 1/2, whatever \(|\psi\rangle\) is. So the measurement learns nothing about the state being processed: the information is passed on, not read out.</p>
+<p>To compare two states we use the <em>fidelity</em> \(|\langle\phi|\psi\rangle|^2\): 1 means identical (up to a global phase), 0 means orthogonal.</p>
+<div class="data"><b>Your data</b>50 angles from 0 to \(2\pi\), a random \(|\psi\rangle\): the fidelity with \(J(\theta)|\psi\rangle\) is 1 for \(s = 0\), and 1 for \(s = 1\) once the \(X\) is undone. Notebook 0.</div>
+<p class="code">In the code: <code>state.cz(0, 1); state.measure_xy(0, theta)</code>, and <code>mbqc.J(theta)</code>.</p>
+<div class="check"><p class="q">Which gate does one measurement at \(\theta = 0\) apply (for \(s = 0\))?</p><button type="button">Show answer</button><p class="a" hidden>\(J(0) = H\,P(0) = H\), the Hadamard gate. Measuring in the X basis moves the state and applies \(H\).</p></div>
+</article>
+
+<article data-unit="0" data-title="A wire of measurements">
+<p>What do many measurements in a row do? Repeat the basic move along a line of qubits 0, 1, 2, …, a 1D cluster or <em>wire</em>. Each measurement moves the state one qubit along and applies one more \(J\); \(\theta_k\) is the angle measured on qubit \(k\). The gates multiply, the first measurement acting first (rightmost):</p>
+<div class="math">\(J(\theta_3)\,J(\theta_2)\,J(\theta_1)\,J(\theta_0)\,|\psi\rangle\)</div>
+<div class="tn" data-d="wire5"></div>
+<p>The state being processed is the <em>logical qubit</em>: it hops from physical qubit to physical qubit along the wire. Any single-qubit gate \(U\) is, up to a phase, a rotation of the Bloch sphere, and any rotation of a sphere is three turns about fixed axes: by \(a\) about the x axis, then \(b\) about z, then \(c\) about x again. Write \(R_x(\phi)\) for the turn by \(\phi\) about the x axis, \(R_z(\phi)\) about z; then \(U \propto R_x(c)\,R_z(b)\,R_x(a)\), and \(a, b, c\) are the <em>Euler angles</em> of \(U\). So four measurements, on a 5-qubit wire, are enough for <strong>any</strong> single-qubit gate, at the angles in the picture (Part 3 shows why).</p>
+<p>The byproducts now matter. An \(X\) left over from one step flips the sign of the next useful angle, so each angle must be chosen <em>after</em> seeing the earlier outcomes. That is feedforward, and it is the only reason the measurements have a time order.</p>
+<div class="data"><b>Your data</b>A random gate \(U\), all \(2^4 = 16\) outcome patterns forced one by one. With angles adapted to the outcomes, all 16 give exactly \(U|\psi\rangle\). With fixed angles, only 2 of the 16 do: those where no angle needed flipping. Notebook 0.</div>
+<p>Add vertical edges between wires and you get two-qubit gates (Part 4). Single-qubit gates plus the CNOT (controlled-NOT: flip the second qubit when the first is 1) are <em>universal</em>: together they build any quantum circuit. So a large enough cluster state runs any quantum circuit.</p>
+<p class="cite">Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>. A tutorial: Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0603226">arXiv:quant-ph/0603226</a>.</p>
+<div class="check"><p class="q">A wire of 5 qubits carries 4 measurements. Why not 5?</p><button type="button">Show answer</button><p class="a" hidden>The last qubit holds the output. Measuring it would end the computation, not apply another gate.</p></div>
+</article>
+
+<article data-unit="1" data-title="The graph-state recipe">
+<p>Which states can serve as the resource? Any graph defines one, by the recipe of "The cluster state". Vertices are qubits, edges say who gets entangled:</p>
+<ul>
+<li>put every qubit in \(|+\rangle\);</li>
+<li>apply CZ on every edge.</li>
+</ul>
+<div class="math">\(|G\rangle = \prod_{(a,b)\in E} \mathrm{CZ}_{ab}\; |+\rangle^{\otimes n}\)</div>
+<p>A <em>cluster state</em> is the graph state of a line (1D) or a square lattice (2D).</p>
+<p>The amplitudes are easy to write down. \(|+\rangle^{\otimes n}\) gives every bit string \(x\) the amplitude \(2^{-n/2}\). Each CZ flips the sign when both its ends are 1. So</p>
+<div class="math">\(\langle x|G\rangle = 2^{-n/2}\,(-1)^{\#\{\text{edges with both ends } 1\}}\)</div>
+<div class="data"><b>Your data</b>5-qubit line, amplitude × \(\sqrt{32}\): \(00000 \to +1\), \(00011 \to -1\) (one edge, (3, 4), has both ends 1), \(00111 \to +1\) (two edges), \(01010 \to +1\) (none). Notebook 1.</div>
+<p class="code">In the code: <code>mbqc.graph_state(range(5), line_edges(5))</code>. Qubit 0 is the leftmost bit.</p>
+<div class="check"><p class="q">On the 5-qubit line, what is the sign of the amplitude of \(11111\)?</p><button type="button">Show answer</button><p class="a" hidden>\(+\). All 4 edges have both ends 1, and \((-1)^4 = +1\).</p></div>
+</article>
+
+<article data-unit="1" data-title="Stabilizers">
+<p>How can a graph state be described without listing its \(2^n\) amplitudes? MBQC papers use \(n\) operators that leave it unchanged, its <em>stabilizers</em>.</p>
+<p>Start from \(|+\rangle\), which \(X\) leaves unchanged. Pass \(X\) through a CZ:</p>
+<div class="math">\(\mathrm{CZ}\,(X\otimes I)\,\mathrm{CZ} = X\otimes Z\)</div>
+<p>So each CZ attached to qubit \(a\) dresses its \(X_a\) with a \(Z\) on the neighbour. After all the CZs, the stabilizer of vertex \(a\) is</p>
+<div class="math">\(K_a = X_a \prod_{b\in N(a)} Z_b, \qquad K_a|G\rangle = |G\rangle\)</div>
+<div class="tn" data-d="stab"></div>
+<p>where \(N(a)\) is the set of neighbours of \(a\). The \(n\) operators \(K_a\) commute with each other and fix \(|G\rangle\) uniquely.</p>
+<div class="data"><b>Your data</b>5-qubit line: \(K_0 = X_0Z_1\), \(K_1 = Z_0X_1Z_2\), …, \(K_4 = Z_3X_4\) all have \(\langle K\rangle = +1.000\). A product that is not a stabilizer: \(\langle X_0X_1\rangle = 0\). Notebook 1.</div>
+<p class="cite">Hein et al., <a href="https://arxiv.org/abs/quant-ph/0602096">arXiv:quant-ph/0602096</a>.</p>
+<div class="check"><p class="q">What is the stabilizer of the centre qubit \((1,1)\) of a 3 × 3 cluster?</p><button type="button">Show answer</button><p class="a" hidden>\(X_{(1,1)}\,Z_{(0,1)}Z_{(1,0)}Z_{(1,2)}Z_{(2,1)}\): an \(X\) on the centre and a \(Z\) on each of its four neighbours.</p></div>
+</article>
+
+<article data-unit="1" data-title="Entanglement is counting">
+<p>How much entanglement does a graph state carry across a cut? For graph states it is a counting problem. Split the qubits into a region \(A\) and the rest \(\bar A\). Take the block of the adjacency matrix that links \(A\) to \(\bar A\): one row per qubit in \(A\), one column per qubit outside, a 1 for each edge crossing the cut. Then the entanglement entropy, in bits (a Bell pair carries exactly 1 bit), is the rank of that block computed mod 2: row-reduce it using XOR of rows, and count the rows that survive.</p>
+<div class="math">\(S(A) = \mathrm{rank}_{\mathrm{GF}(2)}\,\Gamma_{A\bar A}\)</div>
+<p>On a 1D cluster only one edge crosses any cut, so <strong>every cut of a line carries exactly 1 bit</strong>.</p>
+<p>In 2D, more edges cross:</p>
+<div class="tn" data-d="cut2d"></div>
+<p>The rank is not the number of crossing edges. Take the 2 × 2 corner block of a 3 × 3 cluster. Four edges cross: \((0,1)\)–\((0,2)\), \((1,1)\)–\((1,2)\), \((1,0)\)–\((2,0)\), \((1,1)\)–\((2,1)\). With columns \((0,2), (1,2), (2,0), (2,1), (2,2)\), the block is</p>
+<div class="math">\(\Gamma_{A\bar A} = \begin{pmatrix} 0&amp;0&amp;0&amp;0&amp;0 \\ 1&amp;0&amp;0&amp;0&amp;0 \\ 0&amp;0&amp;1&amp;0&amp;0 \\ 0&amp;1&amp;0&amp;1&amp;0 \end{pmatrix}\)</div>
+<p>with rows \((0,0), (0,1), (1,0), (1,1)\). The corner \((0,0)\) touches nothing outside, and \((1,1)\) has two crossing edges in one row. So 4 edges cross, but only 3 rows are independent: \(S = 3\) bits.</p>
+<div class="data"><b>Your data</b>3 × 3 cluster, entropy from the state against the GF(2) rank: a corner qubit 1 bit (rank 1), the centre qubit 1 bit (rank 1), the left column 3 bits (rank 3), the 2 × 2 corner block 3 bits (rank 3). The 1D line: 1 bit at every cut. Notebook 1.</div>
+<p>That extra entanglement in 2D is what lets two logical qubits talk to each other (Part 4).</p>
+<p class="cite">Hein et al., <a href="https://arxiv.org/abs/quant-ph/0602096">arXiv:quant-ph/0602096</a>.</p>
+<div class="check"><p class="q">A single qubit of a graph state has 4 neighbours. Why is its entropy still only 1 bit?</p><button type="button">Show answer</button><p class="a" hidden>The block linking it to the rest is a single row \((1,1,1,1)\), whose rank is 1. A single qubit can never carry more than 1 bit anyway.</p></div>
+</article>
+
+<article data-unit="1" data-title="Z measurements delete vertices">
+<p>How do you get a graph of a particular shape without making a new one? Carve it out of a big cluster. Measure qubit \(q\) in the Z basis with outcome \(s\). The qubit disappears from the graph, and each of its neighbours picks up a \(Z^s\) byproduct:</p>
+<div class="math">\(|G\rangle \;\to\; \Big(\prod_{b\in N(q)} Z_b^{\,s}\Big)\,|G\setminus q\rangle\)</div>
+<div class="tn" data-d="zdel"></div>
+<p>Why: with qubit \(q\) fixed to \(|s\rangle\), each CZ to \(q\) becomes either nothing (\(s = 0\)) or a \(Z\) on the neighbour (\(s = 1\)). The byproducts are known, so they can be undone or tracked.</p>
+<div class="data"><b>Your data</b>5-qubit line, measure qubit 2 in Z: outcome 1. The new graph is the edges (0, 1) and (3, 4), with \(\langle K_0\rangle = +1\), \(\langle K_1\rangle = -1\), \(\langle K_3\rangle = -1\), \(\langle K_4\rangle = +1\), and 0 entanglement between the halves. Notebook 1.</div>
+<p>The two \(-1\)s are the \(Z\) byproducts on qubits 1 and 3: a \(Z\) anticommutes with the \(X\) in their stabilizers. <strong>A large 2D cluster is a blank canvas</strong>: carve the graph you need with Z measurements and compute on the rest.</p>
+<p class="code">In the code: <code>state.measure_z(2)</code>.</p>
+<div class="check"><p class="q">Which stabilizer signs would you see if the Z outcome had been 0?</p><button type="button">Show answer</button><p class="a" hidden>All \(+1\). With \(s = 0\) there is no byproduct, and the two pieces are plain 2-qubit clusters.</p></div>
+</article>
+
+<article data-unit="2" data-title="The central calculation">
+<p>Where does the basic move of "One measurement is a gate" come from? This is the calculation everything else repeats.</p>
+<p>Write \(|\psi\rangle = a|0\rangle + b|1\rangle\) on qubit 0. The CZ leaves the \(|0\rangle\) part alone and applies \(Z\) to qubit 1 in the \(|1\rangle\) part, turning \(|+\rangle\) into \(|-\rangle\):</p>
+<div class="math">\(\mathrm{CZ}\,|\psi\rangle|+\rangle = a|0\rangle|+\rangle + b|1\rangle|-\rangle\)</div>
+<p>Now project qubit 0 onto \(\langle\pm_\theta| = (\langle 0| \pm e^{-i\theta}\langle 1|)/\sqrt2\). Qubit 1 is left in (unnormalized)</p>
+<div class="math">\(\tfrac{1}{\sqrt2}\left(a|+\rangle \pm e^{-i\theta}\, b|-\rangle\right)\)</div>
+<div class="math">\(= \tfrac{1}{\sqrt2}\,H\left(a|0\rangle \pm e^{-i\theta} b|1\rangle\right)\)</div>
+<p>For \(+\) the bracket is \(P(-\theta)|\psi\rangle\). For \(-\) it is \(Z P(-\theta)|\psi\rangle\), and \(HZ = XH\). Together, after normalizing:</p>
+<div class="math">\(|\text{out}\rangle = X^s\, H\, P(-\theta)\,|\psi\rangle = X^s J(\theta)|\psi\rangle\)</div>
+<p>Three things happened: the state <strong>moved</strong> from qubit 0 to qubit 1 (teleportation), a <strong>gate</strong> \(J(\theta)\) was applied, chosen by the angle, and a random but known <strong>byproduct</strong> \(X^s\) appeared.</p>
+<div class="data"><b>Your data</b>A random \(|\psi\rangle\), \(\theta = 0.9\), both outcomes forced: fidelity with \(X^sJ(\theta)|\psi\rangle\) is 1.000000000000 for \(s = 0\) and for \(s = 1\). Notebook 2.</div>
+<p class="cite">Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>; Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0603226">arXiv:quant-ph/0603226</a>.</p>
+<div class="check"><p class="q">Why does the formula have \(P(-\theta)\), with a minus sign, when you measure at \(+\theta\)?</p><button type="button">Show answer</button><p class="a" hidden>Projecting onto \(\langle +_\theta|\) uses the complex conjugate of \(e^{i\theta}\), so the \(|1\rangle\) part of \(\psi\) picks up \(e^{-i\theta}\).</p></div>
+</article>
+
+<article data-unit="2" data-title="Why the outcome is a coin flip">
+<p>Does the outcome tell us anything about \(|\psi\rangle\)? Each branch of the last lesson has squared norm \((|a|^2 + |b|^2)/2 = 1/2\). So <strong>each outcome has probability exactly 1/2, for every input state</strong>.</p>
+<p>That is essential. If the probabilities depended on \(|\psi\rangle\), the measurement would have learned something about \(|\psi\rangle\), and so disturbed it. Here it learns nothing, and the state passes through intact.</p>
+<p>The price is randomness: half the time you get \(J|\psi\rangle\), half the time \(XJ|\psi\rangle\). If you ignore which, the output is a 50/50 mixture of the two. \(X\) flips the Y and Z components of the Bloch vector \((\langle X\rangle, \langle Y\rangle, \langle Z\rangle)\) (lesson "One measurement is a gate") and keeps the X component, so the mixture keeps only the X component.</p>
+<div class="data"><b>Your data</b>\(\theta = 0.9\): \(P(s=0), P(s=1) = 0.5, 0.5\) for three random inputs. The ideal Bloch vector of \(J|\psi\rangle\) is \((-0.848, -0.3564, 0.3921)\); ignoring the outcome gives \((-0.848, 0, 0)\). Notebook 2.</div>
+<p><strong>Keeping track of the outcome is not optional.</strong> Without it, the computation turns into noise after one step.</p>
+<div class="check"><p class="q">If you ignore the outcome, which input states still come out right?</p><button type="button">Show answer</button><p class="a" hidden>Those with \(J|\psi\rangle\) on the X axis of the Bloch sphere, \(|\pm\rangle\), since \(X\) leaves them unchanged (up to a sign that is a global phase).</p></div>
+</article>
+
+<article data-unit="2" data-title="Feedforward in PennyLane">
+<p>Can a standard circuit simulator run this? PennyLane can, since it supports measurements in the middle of a circuit (<em>mid-circuit measurements</em>) and gates conditioned on their results. Two calls do it:</p>
+<ul>
+<li><code>pennylane.ftqc.measure_arbitrary_basis(wire, angle=theta, plane="XY")</code> measures in the basis \(|\pm_\theta\rangle\), with the same angle convention as this course;</li>
+<li><code>qml.cond(m, qml.X)(wire)</code> applies \(X\) on the next qubit only if the outcome \(m\) is 1, undoing the byproduct on the spot.</li>
+</ul>
+<p>That conditional \(X\) is a simulator shortcut. MBQC itself has no gate to apply it; it tracks the byproduct instead and adapts the later angles to it, which is the feedforward of lesson 1 (the next two lessons). On a single step both give the same output.</p>
+<p>A circuit with mid-circuit measurements cannot return a state vector, so the check compares Bloch vectors on the output wire.</p>
+<div class="data"><b>Your data</b>\(\theta = 0.9\). PennyLane with the conditional \(X\): \((-0.848, -0.3564, 0.3921)\), equal to the NumPy ideal. PennyLane without it: \((-0.848, 0, 0)\), equal to the NumPy result that ignores the outcome. Notebook 2.</div>
+<div class="check"><p class="q">Without <code>qml.cond</code>, which component of the Bloch vector survives, and why?</p><button type="button">Show answer</button><p class="a" hidden>Only the X component, \(-0.848\). The uncorrected \(X^s\) flips Y and Z half the time, so they average to 0.</p></div>
+</article>
+
+<article data-unit="2" data-title="Byproducts flip the next angle">
+<p>What does a leftover byproduct do to the next step? Chain two steps on a 3-qubit line 0–1–2. After measuring qubit 0, qubit 1 holds \(X^{s_0}J(\theta_0)|\psi\rangle\). Measuring qubit 1 applies \(J(\theta_1) = H P(-\theta_1)\), which now has an \(X\) in front of it when \(s_0 = 1\). \(X\) does not commute with the phase gate; moving it through flips the angle:</p>
+<div class="math">\(P(-\theta)\,X = X\,P(+\theta) \quad\text{(up to a global phase)}\)</div>
+<p>So if \(s_0 = 1\), qubit 1 must be measured at \(-\theta_1\) instead of \(\theta_1\). This is an <em>adaptive measurement</em>, and it is the only reason MBQC has a time order at all: qubit 1 cannot be measured before qubit 0's outcome is known.</p>
+<div class="data"><b>Your data</b>\(\theta_0 = 0.4\), \(\theta_1 = 1.3\), all four branches \((s_0, s_1)\) forced. With adapted angles, fidelity with \(J(\theta_1)J(\theta_0)|\psi\rangle\) is 1 in all four. With fixed angles: \(1, 1, 0.0994, 0.0994\), failing exactly when \(s_0 = 1\). Notebook 2.</div>
+<p class="code">In the code: <code>mbqc.run_wire(psi, [0.4, 1.3], outcomes=o, adaptive=False)</code>.</p>
+<div class="check"><p class="q">Check \(P(-\theta)X = X P(\theta)\) up to phase on the basis state \(|0\rangle\).</p><button type="button">Show answer</button><p class="a" hidden>Left: \(X|0\rangle = |1\rangle\), then \(P(-\theta)\) gives \(e^{-i\theta}|1\rangle\). Right: \(P(\theta)|0\rangle = |0\rangle\), then \(X\) gives \(|1\rangle\). They differ by the phase \(e^{-i\theta}\), the same one for \(|1\rangle\).</p></div>
+</article>
+
+<article data-unit="2" data-title="The Pauli frame">
+<p>How do we live with byproducts we cannot undo? Undoing each one as soon as it appears would need a gate, which MBQC does not have. So byproducts are never undone on the spot. They are <em>tracked</em> as two bits per qubit, \((x, z)\), meaning the actual state is \(X^xZ^z\) times the ideal one. This record is the <em>Pauli frame</em>. Three rules run it:</p>
+<ul>
+<li><strong>Measure</strong> at \((-1)^x\,\theta\): flip the angle if the qubit carries an \(X\).</li>
+<li><strong>Update.</strong> With the angle already flipped by rule 1, \(J\) swaps \(X\) and \(Z\) (formula below), and the measurement adds \(X^s\). With outcome \(s\), the next qubit's frame becomes \((x, z) \to (z \oplus s,\ x)\).</li>
+<li><strong>Undo once at the end</strong>, on the output qubit: apply \(X\) if \(x = 1\), then \(Z\) if \(z = 1\).</li>
+</ul>
+<div class="math">\(J\big((-1)^x\theta\big)\,X^xZ^z \propto Z^xX^z\,J(\theta)\)</div>
+<p>Here \(\propto\) means equal up to a global phase, and \(\oplus\) is addition mod 2 (XOR). The \((-1)^x\) on the left is rule 1 at work: since \(P(-\theta)X \propto X P(\theta)\), an \(X\) only passes through \(J\) once the angle is flipped. A \(Z\) commutes with \(P\), so it does not flip <em>this</em> qubit's angle. But \(J\) turns it into an \(X\) on the next qubit (rule 2 sends \(z\) into the next \(x\)), and that \(X\) flips the next angle. A \(Z\) delays a flip by one step; it does not avoid it. Lesson "A traced run" shows one: the \(Z\) on qubit 2 causes the flip on qubit 3.</p>
+<p class="cite">Checked in notebook 2 (all four branches of the 3-qubit wire) and notebook 3 (all 16 of the 5-qubit wire). Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
+<p class="code">In the code: <code>mbqc.PauliFrame</code>, with <code>angle</code>, <code>teleport</code> and <code>undo</code>.</p>
+<div class="check"><p class="q">A qubit carries frame \((x, z) = (0, 1)\) and is measured with outcome \(s = 1\). What frame does the next qubit get, and must its angle be flipped?</p><button type="button">Show answer</button><p class="a" hidden>\((z \oplus s, x) = (1 \oplus 1, 0) = (0, 0)\): no byproduct, so its angle is not flipped.</p></div>
+</article>
+
+<article data-unit="3" data-title="Four angles make any rotation">
+<p>Which gates can four measurements make? Part 2 gave one gate, \(J(\theta) = H P(-\theta)\), per measurement. Use two facts: \(P(\phi)\) equals \(R_z(\phi)\) up to a global phase, and conjugating by \(H\) turns a \(Z\) rotation into an \(X\) rotation, \(H P(\phi) H \propto R_x(\phi)\). Then, with \(P_k\) short for \(P(-\theta_k)\) and the first angle set to 0,</p>
+<div class="math">\(J(\theta_3)J(\theta_2)J(\theta_1)J(0) = HP_3\,HP_2\,HP_1\,H\)</div>
+<div class="math">\(= (HP_3H)\,P_2\,(HP_1H)\)</div>
+<div class="math">\(\propto R_x(-\theta_3)\,R_z(-\theta_2)\,R_x(-\theta_1)\)</div>
+<p>The rotations are \(R_x(\phi) = \cos(\phi/2)\,I - i\sin(\phi/2)\,X\), and the same with \(Z\) for \(R_z\). The first measurement, at angle 0, just supplies the Hadamard that opens the sandwich.</p>
+<p>Every single-qubit unitary is, up to a phase, an \(X\)–\(Z\)–\(X\) rotation. So a 5-qubit wire (input, four measurements, output) does any single-qubit gate. This is the Raussendorf–Browne–Briegel construction.</p>
+<p class="cite">Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
+<div class="check"><p class="q">Which angles give the identity gate (up to phase)?</p><button type="button">Show answer</button><p class="a" hidden>All four angles 0: \(J(0)^4 = H^4 = I\).</p></div>
+</article>
+
+<article data-unit="3" data-title="Euler angles to measurement angles">
+<p>Which angles run a given gate \(U\)? Write \(U\) through its Euler angles (lesson "A wire of measurements"), three rotations about fixed axes:</p>
+<div class="math">\(U \propto R_x(c)\,R_z(b)\,R_x(a)\)</div>
+<p>(\(a\) acts first). Match this with the last lesson's \(R_x(-\theta_3)R_z(-\theta_2)R_x(-\theta_1)\) and read off the four measurement angles along the wire:</p>
+<div class="math">\((\theta_0, \theta_1, \theta_2, \theta_3) = (0,\ -a,\ -b,\ -c)\)</div>
+<p>These are the angles you would use if no byproducts ever appeared. In practice each one may still be flipped by the Pauli frame, depending on the outcomes before it.</p>
+<div class="data"><b>Your data</b>A random \(U\): \((a, b, c) = (3.1004, 0.9017, -3.1301)\), and \(R_x(c)R_z(b)R_x(a)\) matches \(U\) with fidelity 1.0. Wire angles \((0, -3.1004, -0.9017, 3.1301)\). Notebook 3.</div>
+<p class="code">In the code: <code>mbqc.euler_xzx(U)</code> and <code>mbqc.rotation_angles(U)</code>.</p>
+<div class="check"><p class="q">What are the wire angles for \(U = R_z(\pi/4)\)?</p><button type="button">Show answer</button><p class="a" hidden>\(a = c = 0\), \(b = \pi/4\), so \((0, 0, -\pi/4, 0)\).</p></div>
+</article>
+
+<article data-unit="3" data-title="A traced run">
+<p>What does the Pauli frame do in a real run? Here is one run of the 5-qubit wire for the \(U\) of the last lesson, outcome by outcome. Step through it: each frame measures one qubit, shows the angle used against the angle wanted, and writes the new byproduct \(X^xZ^z\) under the next qubit.</p>
+<div class="stepper"></div>
+<p>Two of the four angles were flipped, because the qubit carried an \(X\). Qubit 2 carried only a \(Z\), so its angle stayed; measuring it turned that \(Z\) into the \(X\) on qubit 3, which flipped qubit 3's angle. The output qubit ended with \(X^1Z^1\), undone once at the end.</p>
+<div class="data"><b>Your data</b>Outcomes \(s = 1, 0, 0, 1\). Qubit 1 measured at \(+3.100\) (wanted \(-3.100\)), qubit 3 at \(-3.130\) (wanted \(+3.130\)). After the undo, fidelity with \(U|\psi\rangle\) is 1.0. Notebook 3.</div>
+<div class="check"><p class="q">Qubit 1 had frame \((1, 0)\) and outcome \(s = 0\). Use the update rule to check the frame on qubit 2.</p><button type="button">Show answer</button><p class="a" hidden>\((z \oplus s, x) = (0 \oplus 0, 1) = (0, 1)\), that is \(X^0Z^1\), as shown.</p></div>
+</article>
+
+<article data-unit="3" data-title="All sixteen branches">
+<p>Does the frame work for every outcome, or was that run lucky? Four outcomes give \(2^4 = 16\) branches, and the code can force each one in turn.</p>
+<div class="data"><b>Your data</b>With adaptation: the minimum fidelity with \(U|\psi\rangle\) over all 16 branches is 1.0. Without it: 1.0 (to three digits) in half the branches, but 0.466, 0.466, 0.473, 0.473, 0.456, 0.456, 0.45, 0.45 in the eight branches with \(s_1 = 1\). Notebook 3.</div>
+<p>Why only those eight? The angle that matters is \(\theta_2 = -b = -0.9017\). An outcome \(s_1 = 1\) puts an \(X\) on qubit 2, and the fixed angle then applies \(R_z(-b)\) instead of \(R_z(b)\): the wrong gate.</p>
+<p>The other flips barely matter for this \(U\), because \(a\) and \(c\) are close to \(\pm\pi\), and \(R_x(\pi)\) and \(R_x(-\pi)\) differ only by a global phase. That is why fixed angles survive in 8 branches here but in only 2 in lesson "A wire of measurements": for a generic \(U\) every flip matters, and only the 2 branches with no flipped angle come out right. The last outcome \(s_3\) never changes a later angle at all: it only enters the final correction.</p>
+<p>PennyLane does adaptive measurement directly: <code>pennylane.ftqc.cond_measure</code> picks the measurement basis from an earlier outcome.</p>
+<div class="data"><b>Your data</b>The 3-qubit wire of "Byproducts flip the next angle" (\(\theta_0 = 0.4\), \(\theta_1 = 1.3\)) with <code>cond_measure</code>: Bloch vector \((-0.9202, 0.3866, -0.0611)\) in PennyLane, the same as NumPy. Notebook 3.</div>
+<div class="check"><p class="q">For a gate with \(a = c = 0.5\), would more than eight non-adaptive branches fail?</p><button type="button">Show answer</button><p class="a" hidden>Yes. Now flipping \(\theta_1\) or \(\theta_3\) gives a genuinely different \(R_x\), so branches that put an \(X\) on qubit 1 or qubit 3 fail too.</p></div>
+</article>
+
+<article data-unit="3" data-title="Which angles must wait">
+<p>Which measurements really have to wait for earlier outcomes? Feedforward only matters when flipping the sign of an angle changes something. For angles that are multiples of \(\pi/2\) it does not:</p>
+<ul>
+<li>\(\theta = 0\) or \(\pi\): \(-\theta\) is the same basis.</li>
+<li>\(\theta = \pm\pi/2\): \(-\theta\) is the same Y basis with the two outcome labels swapped, and a swapped label is just a different byproduct to track.</li>
+</ul>
+<p>These are the X and Y measurements, the <em>Pauli measurements</em>. The test is</p>
+<div class="math">\(\sin(2\theta) = 0\)</div>
+<p><strong>Pauli measurements never wait for earlier outcomes</strong>, so they can all be done at once, at the start. Only the other angles force a time order. Part 5 shows how far this goes.</p>
+<p>One more limit: a 1D cluster only ever holds one logical qubit. To make qubits interact you need a second dimension.</p>
+<p class="code">In the code: <code>mbqc.is_pauli_angle(theta)</code>.</p>
+<div class="check"><p class="q">The wire for a Hadamard gate, \(U = H\), uses which angles, and do any of them wait?</p><button type="button">Show answer</button><p class="a" hidden>One valid choice is \((0, -\pi/2, -\pi/2, -\pi/2)\), from \(H \propto R_x(\pi/2)R_z(\pi/2)R_x(\pi/2)\). All four are Pauli angles, so none waits: a flipped sign is handled by relabelling that outcome afterwards.</p></div>
+</article>
+
+<article data-unit="4" data-title="Edges between wires are free CZs">
+<p>What does an edge between two wires do? Two separate wires never touch, so they can never entangle their two logical qubits. A 2D cluster joins wires with vertical edges.</p>
+<p>All the CZs were applied when the resource state was made, before any measurement. But a CZ commutes with every measurement on other qubits. So the CZ on an edge can be moved later, to the moment the two logical qubits sit at its two ends, and there it acts between them. <strong>An edge between the qubits holding two logical qubits is a CZ gate, already applied, for free.</strong></p>
+<p>A CZ plus single-qubit gates gives a CNOT. Sandwich the CZ between Hadamards on the target:</p>
+<div class="math">\(\mathrm{CNOT} = (I\otimes H)\,\mathrm{CZ}\,(I\otimes H)\)</div>
+<p>and a Hadamard is one wire step at angle 0, \(H = J(0)\) (lesson "One measurement is a gate"). So the target walks two steps along its wire, and the CZ edge sits between them. The control does not move at all.</p>
+<div class="check"><p class="q">Why does \(H\,Z\,H = X\) turn a CZ into a CNOT?</p><button type="button">Show answer</button><p class="a" hidden>CZ applies \(Z\) to the target when the control is 1. Conjugating the target by \(H\) turns that \(Z\) into an \(X\): a NOT on the target when the control is 1.</p></div>
+</article>
+
+<article data-unit="4" data-title="Carving the CNOT patch">
+<p>What is the smallest piece of cluster that runs a CNOT? A patch cut out of a 2 × 3 piece of a 2D cluster:</p>
+<div class="tn" data-d="patch23"></div>
+<ul>
+<li>The two top corners are measured in Z, which deletes them (lesson "Z measurements delete vertices"). Each leaves a \(Z^s\) on its neighbours.</li>
+<li>The control \(c\) is the top-middle qubit. Its input qubit is its output qubit.</li>
+<li>The target enters on \(t_0\) and walks \(t_0 \to t_1 \to t_2\) with two X measurements, two Hadamards.</li>
+<li>Between the two Hadamards, the logical target sits on \(t_1\), which shares an edge with \(c\): that edge is the CZ. It was made at the start, but it commutes with the measurement of \(t_0\), so it acts as if applied just after it.</li>
+</ul>
+<p>What is left after carving is 4 qubits: \(c\), \(t_0\), \(t_1\), \(t_2\). This is the standard CNOT pattern of the measurement calculus. The original one-way-computer CNOT used a bigger 15-qubit patch.</p>
+<p class="cite">Danos, Kashefi and Panangaden, <a href="https://arxiv.org/abs/0704.1263">arXiv:0704.1263</a>; <a href="https://doi.org/10.1145/1219092.1219096">J. ACM 54, 8 (2007)</a>. Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
+<div class="check"><p class="q">How many qubits are measured in the patch, and how many CZs were made in the resource?</p><button type="button">Show answer</button><p class="a" hidden>4 measured (2 in Z, 2 in X), 2 left as outputs. The 2 × 3 grid has 7 edges: 4 horizontal and 3 vertical.</p></div>
+</article>
+
+<article data-unit="4" data-title="Byproducts through a CZ">
+<p>What happens to an \(X\) byproduct that meets a CZ? The target reaches the CZ edge carrying a byproduct from its first step. Push it through:</p>
+<div class="math">\(\mathrm{CZ}\,(X\otimes I) = (X\otimes Z)\,\mathrm{CZ}\)</div>
+<p><strong>An \(X\) on one side of a CZ adds a \(Z\) on the other side.</strong> A \(Z\) commutes with CZ and passes straight through.</p>
+<p>In the Pauli frame this is two XORs, one for each direction: \(z_c \mathrel{\oplus}= x_{t}\) and \(z_t \mathrel{\oplus}= x_c\). So an \(X\) byproduct on the target, from the first Hadamard step, turns up as a \(Z\) byproduct on the control.</p>
+<p>Why may a byproduct made by measuring \(t_0\) be pushed through a CZ made before it? Because that CZ, on \(c\) and \(t_1\), commutes with the measurement of \(t_0\): applying it before or after gives the same state, so we may treat it as acting after. The whole run is: make the 2 × 3 cluster (all 7 CZs at once); Z-measure the two corners; X-measure \(t_0\) (frame moves to \(t_1\)); apply the frame rule for the \(c\)–\(t_1\) edge; X-measure \(t_1\) (frame moves to \(t_2\)); undo the frames on \(c\) and \(t_2\).</p>
+<p class="cite">Checked in notebook 4 (all 16 branches, next lesson). Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
+<p class="code">In the code: <code>PauliFrame.cz(c, t1)</code>, inside <code>mbqc.run_cnot_patch</code>.</p>
+<div class="check"><p class="q">The target carries \(X^1Z^0\) when the edge acts, the control carries nothing. What are the two frames after the CZ?</p><button type="button">Show answer</button><p class="a" hidden>Target still \(X^1Z^0\) (the control has no \(X\) to give it a \(Z\)). Control gets \(z_c = 0 \oplus 1 = 1\), so \(X^0Z^1\).</p></div>
+</article>
+
+<article data-unit="4" data-title="Checking the CNOT">
+<p>Does the patch really apply a CNOT, whatever the outcomes? Four measured qubits give 16 outcome branches. Forcing each one in turn tests that the bookkeeping is right everywhere, not just on a lucky run.</p>
+<div class="data"><b>Your data</b>A random 2-qubit input: the minimum fidelity with \(\mathrm{CNOT}|\psi\rangle\) over all 16 branches is 1.0. Input \(|+\rangle|0\rangle\): output \((0.7071, 0, 0, 0.7071)\), the Bell state \((|00\rangle + |11\rangle)/\sqrt2\), with 1.0 bit of entanglement. Notebook 4.</div>
+<p>The second check matters most. The two logical qubits went in as a product state and came out with 1 bit of entanglement. Single-qubit measurements on the patch created entanglement between logical qubits, drawn from the entanglement already stored in the cluster.</p>
+<p>Both measurements in this pattern are at angle 0, so the angles never need flipping. The byproducts still need tracking, through the CZ, for the final correction.</p>
+<div class="check"><p class="q">What would the patch output for the input \(|1\rangle|0\rangle\)?</p><button type="button">Show answer</button><p class="a" hidden>\(|1\rangle|1\rangle\): the control is 1, so the target is flipped.</p></div>
+</article>
+
+<article data-unit="5" data-title="J and CZ are universal">
+<p>Is one wire step plus one edge enough for every circuit? Parts 2–4 gave two building blocks: one wire step applies \(J(\theta)\) for any \(\theta\), and one edge applies a CZ. Write a universal gate set in them (products act right to left):</p>
+<div class="math">\(H = J(0), \qquad R_z(\phi) \propto J(0)\,J(-\phi)\)</div>
+<div class="math">\(R_x(\phi) \propto J(-\phi)\,J(0)\)</div>
+<div class="math">\(\mathrm{CNOT} = H_t\,\mathrm{CZ}\,H_t\)</div>
+<p>Check the first: \(J(0)J(-\phi) = H\,H\,P(\phi) = P(\phi) \propto R_z(\phi)\). The second: \(J(-\phi)J(0) = H P(\phi) H \propto R_x(\phi)\).</p>
+<p>\(\{R_x, R_z, \mathrm{CNOT}\}\) is universal, so <strong>every quantum circuit translates into a measurement pattern on a graph state</strong>.</p>
+<p>Mind the minus sign from \(J(\theta) = HP(-\theta)\): an \(R_z(\phi)\) needs a measurement at \(-\phi\).</p>
+<p class="cite">Single-qubit gates plus CNOT are universal: Barenco et al., <a href="https://arxiv.org/abs/quant-ph/9503016">arXiv:quant-ph/9503016</a>; <a href="https://doi.org/10.1103/PhysRevA.52.3457">PRA 52, 3457 (1995)</a>. The translation to patterns: Danos, Kashefi and Panangaden, <a href="https://arxiv.org/abs/0704.1263">arXiv:0704.1263</a>; <a href="https://doi.org/10.1145/1219092.1219096">J. ACM 54, 8 (2007)</a>. Checked in notebook 5.</p>
+<p class="code">In the code: <code>mbqc.to_jcz(gates)</code>.</p>
+<div class="check"><p class="q">How many \(J\)s and CZs does one CNOT cost?</p><button type="button">Show answer</button><p class="a" hidden>Two \(J(0)\)s on the target and one CZ: \(J(0)\), CZ, \(J(0)\).</p></div>
+</article>
+
+<article data-unit="5" data-title="A twenty-line compiler">
+<p>How does a circuit become a graph? Once it is a list of \(J\)s and CZs, the graph follows from two rules:</p>
+<ul>
+<li>each \(J\) on logical qubit \(q\) adds one new vertex to wire \(q\), joined by an edge to the vertex that currently holds \(q\);</li>
+<li>each CZ adds one edge, a <em>rung</em>, between the current vertices of two wires.</li>
+</ul>
+<div class="tn" data-d="compile"></div>
+<p>To run it: make the graph state (input vertices carry the input state, all others \(|+\rangle\)), measure the vertices in order in the XY plane with angles adapted by the Pauli frame, then undo the frame on the output vertices.</p>
+<p><strong>The graph depends only on the circuit's shape; the angles live in the measurements.</strong></p>
+<div class="data"><b>Your data</b>A 3-qubit circuit of 9 gates becomes 20 \(J\)/CZ gates, a graph of 20 qubits and 20 edges, with 17 measurements and outputs on vertices 15, 10 and 19. Three runs with different random outcomes all give fidelity 1.0 with the circuit simulated directly. Notebook 5.</div>
+<p>The reverse also holds: a pattern can be read as a circuit, since a wire step is a one-bit teleportation. The measurement calculus formalizes the translation, and <em>flow</em> says when a pattern can run deterministically.</p>
+<p class="cite">Gottesman and Chuang, <a href="https://arxiv.org/abs/quant-ph/9908010">arXiv:quant-ph/9908010</a>; <a href="https://doi.org/10.1038/46503">Nature 402, 390 (1999)</a>; Nielsen, <a href="https://arxiv.org/abs/quant-ph/0504097">arXiv:quant-ph/0504097</a>; <a href="https://doi.org/10.1016/S0034-4877(06)80014-5">Rep. Math. Phys. 57, 147 (2006)</a>; Danos and Kashefi, <a href="https://arxiv.org/abs/quant-ph/0506062">arXiv:quant-ph/0506062</a>; <a href="https://doi.org/10.1103/PhysRevA.74.052310">PRA 74, 052310 (2006)</a>.</p>
+<p class="code">In the code: <code>mbqc.compile_jcz</code> and <code>mbqc.run_pattern</code>.</p>
+<div class="check"><p class="q">The 9-gate circuit gave 17 \(J\)s and 3 CZs. Why 20 vertices and 20 edges?</p><button type="button">Show answer</button><p class="a" hidden>Vertices: 3 inputs plus one new vertex per \(J\), \(3 + 17 = 20\). Edges: one per \(J\) plus one rung per CZ, \(17 + 3 = 20\).</p></div>
+</article>
+
+<article data-unit="5" data-title="Clifford circuits in one round">
+<p>Which measurements have to wait? Two words first. A <em>Clifford</em> gate maps Pauli operators to Pauli operators; \(H\), \(S = P(\pi/2)\) and CNOT generate all of them. The <em>depth</em> of a circuit is its number of gate layers.</p>
+<p>To see what waits for what before any outcome is known, run the Pauli frame with <em>sets of outcome labels</em> instead of bits. Each frame bit becomes the set of outcomes whose XOR it is, and \(\oplus\) of two sets keeps the labels that appear in exactly one. On the 3-qubit wire of "Byproducts flip the next angle", starting from no byproduct, rule 2, \((x, z) \to (z \oplus s, x)\), gives</p>
+<div class="math">\((\varnothing, \varnothing) \xrightarrow{\ s_0\ } (\{s_0\}, \varnothing) \xrightarrow{\ s_1\ } (\{s_1\}, \{s_0\})\)</div>
+<p>for the frames on qubits 1 and 2. A measurement must wait for every outcome in its \(X\) set, unless its angle is a Pauli angle (lesson "Which angles must wait").</p>
+<p>A <em>round</em> is a set of measurements done at the same time. A measurement's round is one more than the latest round it waits for. Here qubit 0 waits for nothing: round 1. Qubit 1's \(X\) set is \(\{s_0\}\): at \(\theta_1 = 1.3\) it must wait for \(s_0\), round 2; at \(\theta_1 = \pi/2\), a Pauli angle, it waits for nothing, and both qubits go in round 1.</p>
+<p>Now compile the Clifford generators with lesson "J and CZ are universal": \(H = J(0)\), \(S \propto J(0)\,J(-\pi/2)\), and CNOT is \(J(0)\), CZ, \(J(0)\). Every angle is 0 or \(-\pi/2\), a Pauli angle.</p>
+<div class="data"><b>Your data</b>4-qubit layered circuits. Depth 1, 2, 4, 8, 16 with Clifford angles: 1 round every time. With generic angles: 1, 2, 4, 8, 16 rounds. Notebook 5.</div>
+<p><strong>Any Clifford circuit (H, S, CNOT), however deep, runs in one round of simultaneous measurements.</strong> Its angles are all multiples of \(\pi/2\), so nothing ever waits; outcomes only enter the final correction. Only non-Clifford angles create a time order.</p>
+<p>This suits hardware where measuring is fast but entangling gates are hard, like photons: the Clifford part of an algorithm costs one round, whatever its depth.</p>
+<p class="cite">Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
+<p class="code">In the code: <code>mbqc.measurement_depth(pattern)</code>.</p>
+<div class="check"><p class="q">A circuit is 100 Clifford layers followed by one \(R_z(0.3)\). How many rounds?</p><button type="button">Show answer</button><p class="a" hidden>At most 2. All the Clifford measurements go in round 1; the one non-Clifford measurement waits for the outcomes in its \(X\) byproduct, so it goes in round 2 (round 1 if that byproduct happens to be empty).</p></div>
+</article>
+
+<article data-unit="5" data-title="PennyLane's MBQC compiler">
+<p>Does a real software stack do the same compilation? The compiler you just met fits in twenty lines. PennyLane has a production version, <code>pennylane.ftqc.convert_to_mbqc_formalism</code>, that turns a real circuit into graph-state preparation, mid-circuit measurements and conditional corrections. It follows the Raussendorf–Browne–Briegel construction and reuses qubits, so the register stays small.</p>
+<p>A circuit with mid-circuit measurements must be sampled, shot by shot, so the check compares measured frequencies with exact probabilities.</p>
+<div class="data"><b>Your data</b>A 2-qubit circuit, probabilities of the four outcomes. Exact: \((0.391, 0.391, 0.109, 0.109)\). MBQC with 300 shots: \((0.413, 0.417, 0.093, 0.077)\), within shot noise. The compiled circuit uses 15 wires and 25 mid-circuit measurements. Notebook 5.</div>
+<p class="code">In the code: <code>diagonalize_mcms</code>, <code>convert_to_mbqc_formalism</code> and <code>convert_to_mbqc_gateset</code> on a QNode with <code>mcm_method="one-shot"</code>.</p>
+<div class="check"><p class="q">With 300 shots and \(p = 0.109\), about how far off can a frequency be by chance?</p><button type="button">Show answer</button><p class="a" hidden>The standard deviation is \(\sqrt{p(1-p)/300} \approx 0.018\). The measured 0.077 is about 1.8 standard deviations away, which happens by chance.</p></div>
+</article>
+
+<article data-unit="6" data-title="Why photons">
+<p>How does photonic hardware build an MBQC machine? Lesson 1 gave the reason photons suit MBQC: entangling two flying photons is hard, but making small entangled states and measuring them is natural. Two designs build on it, and each experiment below tests one idea from them:</p>
+<ul>
+<li><strong>Xanadu's blueprint</strong> stores each qubit in a mode of light, as a <em>GKP qubit</em> whose small errors can be corrected, and weaves the modes into one large 3D cluster state. Its key hardware figure is tested in "GKP qubits and squeezing".</li>
+<li><strong>PsiQuantum's fusion-based design</strong> makes many small resource states and joins them with two-photon measurements that succeed only part of the time. Tested in "Fusion".</li>
+</ul>
+<p>In both, measuring the 3D cluster in Pauli bases also runs an error-correcting code, so the machine catches its own errors ("Where to go next"). The two other experiments ask what noise does to a pattern and to the cluster's entanglement.</p>
+<p class="cite">Bourassa et al., <a href="https://arxiv.org/abs/2010.02905">arXiv:2010.02905</a>; <a href="https://doi.org/10.22331/q-2021-02-04-392">Quantum 5, 392 (2021)</a>; Menicucci et al., <a href="https://arxiv.org/abs/quant-ph/0605198">arXiv:quant-ph/0605198</a>; <a href="https://doi.org/10.1103/PhysRevLett.97.110501">PRL 97, 110501 (2006)</a>; Raussendorf, Harrington and Goyal, <a href="https://arxiv.org/abs/quant-ph/0510135">arXiv:quant-ph/0510135</a>; <a href="https://doi.org/10.1016/j.aop.2006.01.012">Ann. Phys. 321, 2242 (2006)</a>; Bartolucci et al., <a href="https://arxiv.org/abs/2101.09310">arXiv:2101.09310</a>; <a href="https://doi.org/10.1038/s41467-023-36493-1">Nat. Commun. 14, 912 (2023)</a>.</p>
+<div class="check"><p class="q">Which step of MBQC is hardest for photons, and how does MBQC confine it?</p><button type="button">Show answer</button><p class="a" hidden>Entangling. MBQC does all of it up front, in making the resource state, which photonics does by interference and fusion. Everything after that is single-photon measurement.</p></div>
+</article>
+
+<article data-unit="6" data-title="A Z error is a flipped outcome">
+<p>What does noise on the resource do? Take the simplest kind: a \(Z\) error on a resource qubit, with probability \(p\) each. In the XY basis, \(Z\) swaps the two outcomes:</p>
+<div class="math">\(Z\,|\pm_\theta\rangle = |\mp_\theta\rangle\)</div>
+<p>So a \(Z\) error before the measurement just flips the outcome \(s\). The Pauli frame then records the wrong byproduct, which is the same as an \(X\) or \(Z\) hitting the logical qubit at that point.</p>
+<p>What happens next depends on the later angles. Through Pauli angles it stays a Pauli error and reaches the output as one. At a later non-Pauli angle, the wrong \(X\) bit gives that angle the wrong sign, so a wrong rotation is applied instead (since \(J(\theta)X \propto Z\,J(-\theta)\)). <strong>A \(Z\) error stays a Pauli error only through the Clifford, Pauli-angle part of a pattern.</strong></p>
+<p>To score a noisy wire, run every way the errors can fall (each set \(E\) of qubits hit), take the fidelity of the corrected output with the ideal one, and average with the probability of that \(E\):</p>
+<div class="math">\(\bar F(p) = \sum_{E} p^{|E|}(1-p)^{n-|E|}\,|\langle \psi_{\rm ideal}|\psi_E\rangle|^2\)</div>
+<p>Here \(|E|\) is how many qubits are hit, \(n\) the number of resource qubits (all but the input), and \(\psi_E\) the corrected output with those errors.</p>
+<div class="data"><b>Your data</b>One random input and random angles. Average fidelity at \(p = 0.1\): 0.899 for a wire of 2 measurements, 0.769 for 4, 0.687 for 8. At \(p = 0.2\): 0.798, 0.622, 0.553. Each extra qubit the state passes through is one more chance of an error. Notebook 6 (read off its plot).</div>
+<p>Read the first number through the sum. The wire of 2 measurements has \(n = 2\) resource qubits, so at \(p = 0.1\) the error-free pattern alone gives \((1-p)^2 = 0.81\). The other 0.09 comes from patterns with errors, whose outputs still overlap partly with the ideal one. That 0.899 lands near \(1 - p\) is a coincidence of this input and these angles.</p>
+<p class="code">In the code: <code>mbqc.noise.noisy_wire_fidelity</code>.</p>
+<div class="check"><p class="q">A \(Z\) error hits the output qubit of a wire, after the last measurement. Is it still a flipped outcome?</p><button type="button">Show answer</button><p class="a" hidden>No: nothing measures that qubit, so it stays a plain \(Z\) error on the output. Only errors after the last non-Pauli measurement end as Pauli errors on the output; earlier ones can become wrong rotations.</p></div>
+</article>
+
+<article data-unit="6" data-title="When the cluster's entanglement dies">
+<p>How much noise can the resource take before its entanglement is gone? Dephase every qubit of a 1D cluster (a \(Z\) with probability \(p\)) and measure the entanglement across the middle cut with the <em>negativity</em>. Take the density matrix of the two halves \(A, B\) and transpose only \(B\)'s indices (the <em>partial transpose</em>). An unentangled state still has no negative eigenvalues after this, so a negative eigenvalue proves entanglement. The negativity is the sum of their magnitudes: 0 for unentangled states, 0.5 for the clean cluster cut.</p>
+<div class="plot">
+<svg viewBox="0 0 340 230" width="340" role="img" aria-label="Middle-cut negativity of a dephased 1D cluster against the dephasing probability p: the points for n = 4, 6 and 8 coincide and follow (1 − p)² − 1/2 down to zero at p* ≈ 0.293"><line class="grid" x1="46.0" y1="12" x2="46.0" y2="190"/><text class="tick" x="46.0" y="205" text-anchor="middle">0</text><line class="grid" x1="102.0" y1="12" x2="102.0" y2="190"/><text class="tick" x="102.0" y="205" text-anchor="middle">0.1</text><line class="grid" x1="158.0" y1="12" x2="158.0" y2="190"/><text class="tick" x="158.0" y="205" text-anchor="middle">0.2</text><line class="grid" x1="214.0" y1="12" x2="214.0" y2="190"/><text class="tick" x="214.0" y="205" text-anchor="middle">0.3</text><line class="grid" x1="270.0" y1="12" x2="270.0" y2="190"/><text class="tick" x="270.0" y="205" text-anchor="middle">0.4</text><line class="grid" x1="326.0" y1="12" x2="326.0" y2="190"/><text class="tick" x="326.0" y="205" text-anchor="middle">0.5</text><line class="grid" x1="46" y1="154.4" x2="326" y2="154.4"/><text class="tick" x="40" y="158.4" text-anchor="end">0.1</text><line class="grid" x1="46" y1="118.8" x2="326" y2="118.8"/><text class="tick" x="40" y="122.8" text-anchor="end">0.2</text><line class="grid" x1="46" y1="83.2" x2="326" y2="83.2"/><text class="tick" x="40" y="87.2" text-anchor="end">0.3</text><line class="grid" x1="46" y1="47.6" x2="326" y2="47.6"/><text class="tick" x="40" y="51.6" text-anchor="end">0.4</text><line class="grid" x1="46" y1="12.0" x2="326" y2="12.0"/><text class="tick" x="40" y="16.0" text-anchor="end">0.5</text><line class="axis" x1="46" y1="190" x2="326" y2="190"/><polyline class="fit" fill="none" points="46.0,12.0 48.8,15.6 51.6,19.1 54.4,22.6 57.2,26.1 60.0,29.6 62.8,33.0 65.6,36.5 68.4,39.9 71.2,43.3 74.0,46.7 76.8,50.1 79.6,53.4 82.4,56.8 85.2,60.1 88.0,63.4 90.8,66.7 93.6,69.9 96.4,73.2 99.2,76.4 102.0,79.6 104.8,82.8 107.6,86.0 110.4,89.2 113.2,92.3 116.0,95.4 118.8,98.5 121.6,101.6 124.4,104.7 127.2,107.8 130.0,110.8 132.8,113.8 135.6,116.8 138.4,119.8 141.2,122.8 144.0,125.7 146.8,128.6 149.6,131.5 152.4,134.4 155.2,137.3 158.0,140.2 160.8,143.0 163.6,145.8 166.4,148.6 169.2,151.4 172.0,154.2 174.8,156.9 177.6,159.7 180.4,162.4 183.2,165.1 186.0,167.8 188.8,170.4 191.6,173.1 194.4,175.7 197.2,178.3 200.0,180.9 202.8,183.4 205.6,186.0 208.4,188.5 211.2,190.0 214.0,190.0 216.8,190.0 219.6,190.0 222.4,190.0 225.2,190.0 228.0,190.0 230.8,190.0 233.6,190.0 236.4,190.0 239.2,190.0 242.0,190.0 244.8,190.0 247.6,190.0 250.4,190.0 253.2,190.0 256.0,190.0 258.8,190.0 261.6,190.0 264.4,190.0 267.2,190.0 270.0,190.0 272.8,190.0 275.6,190.0 278.4,190.0 281.2,190.0 284.0,190.0 286.8,190.0 289.6,190.0 292.4,190.0 295.2,190.0 298.0,190.0 300.8,190.0 303.6,190.0 306.4,190.0 309.2,190.0 312.0,190.0 314.8,190.0 317.6,190.0 320.4,190.0 323.2,190.0 326.0,190.0"/><line class="axis" x1="210.0" y1="12" x2="210.0" y2="190" stroke-dasharray="3 3"/><text class="lab" x="215.0" y="30">p* ≈ 0.293</text><circle class="pt" cx="46.0" cy="12.0" r="3.5"><title>p = 0.00: negativity 0.5000 (n = 4), 0.5000 (n = 6), 0.5000 (n = 8)</title></circle><circle class="pt" cx="57.2" cy="26.1" r="3.5"><title>p = 0.02: negativity 0.4604 (n = 4), 0.4604 (n = 6), 0.4604 (n = 8)</title></circle><circle class="pt" cx="68.4" cy="39.9" r="3.5"><title>p = 0.04: negativity 0.4216 (n = 4), 0.4216 (n = 6), 0.4216 (n = 8)</title></circle><circle class="pt" cx="79.6" cy="53.4" r="3.5"><title>p = 0.06: negativity 0.3836 (n = 4), 0.3836 (n = 6), 0.3836 (n = 8)</title></circle><circle class="pt" cx="90.8" cy="66.7" r="3.5"><title>p = 0.08: negativity 0.3464 (n = 4), 0.3464 (n = 6), 0.3464 (n = 8)</title></circle><circle class="pt" cx="102.0" cy="79.6" r="3.5"><title>p = 0.10: negativity 0.3100 (n = 4), 0.3100 (n = 6), 0.3100 (n = 8)</title></circle><circle class="pt" cx="113.2" cy="92.3" r="3.5"><title>p = 0.12: negativity 0.2744 (n = 4), 0.2744 (n = 6), 0.2744 (n = 8)</title></circle><circle class="pt" cx="124.4" cy="104.7" r="3.5"><title>p = 0.14: negativity 0.2396 (n = 4), 0.2396 (n = 6), 0.2396 (n = 8)</title></circle><circle class="pt" cx="135.6" cy="116.8" r="3.5"><title>p = 0.16: negativity 0.2056 (n = 4), 0.2056 (n = 6), 0.2056 (n = 8)</title></circle><circle class="pt" cx="146.8" cy="128.6" r="3.5"><title>p = 0.18: negativity 0.1724 (n = 4), 0.1724 (n = 6), 0.1724 (n = 8)</title></circle><circle class="pt" cx="158.0" cy="140.2" r="3.5"><title>p = 0.20: negativity 0.1400 (n = 4), 0.1400 (n = 6), 0.1400 (n = 8)</title></circle><circle class="pt" cx="169.2" cy="151.4" r="3.5"><title>p = 0.22: negativity 0.1084 (n = 4), 0.1084 (n = 6), 0.1084 (n = 8)</title></circle><circle class="pt" cx="180.4" cy="162.4" r="3.5"><title>p = 0.24: negativity 0.0776 (n = 4), 0.0776 (n = 6), 0.0776 (n = 8)</title></circle><circle class="pt" cx="191.6" cy="173.1" r="3.5"><title>p = 0.26: negativity 0.0476 (n = 4), 0.0476 (n = 6), 0.0476 (n = 8)</title></circle><circle class="pt" cx="202.8" cy="183.4" r="3.5"><title>p = 0.28: negativity 0.0184 (n = 4), 0.0184 (n = 6), 0.0184 (n = 8)</title></circle><circle class="pt" cx="214.0" cy="190.0" r="3.5"><title>p = 0.30: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="225.2" cy="190.0" r="3.5"><title>p = 0.32: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="236.4" cy="190.0" r="3.5"><title>p = 0.34: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="247.6" cy="190.0" r="3.5"><title>p = 0.36: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="258.8" cy="190.0" r="3.5"><title>p = 0.38: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="270.0" cy="190.0" r="3.5"><title>p = 0.40: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="281.2" cy="190.0" r="3.5"><title>p = 0.42: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="292.4" cy="190.0" r="3.5"><title>p = 0.44: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="303.6" cy="190.0" r="3.5"><title>p = 0.46: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="314.8" cy="190.0" r="3.5"><title>p = 0.48: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><circle class="pt" cx="326.0" cy="190.0" r="3.5"><title>p = 0.50: negativity 0.0000 (n = 4), 0.0000 (n = 6), 0.0000 (n = 8)</title></circle><text class="lab fitlab" x="94" y="58" text-anchor="start">(1 − p)² − 1/2</text><text class="tick" x="186" y="224" text-anchor="middle">dephasing probability p</text><text class="tick" x="12" y="101" text-anchor="middle" transform="rotate(-90 12 101)">negativity, middle cut</text></svg>
+<p class="cap">One dot per \(p\), for \(n = 6\); \(n = 4\), 6 and 8 agree to 4 digits at every \(p\). Solid line: \((1-p)^2 - 1/2\); dashed line: \(p^*\).</p></div>
+<p>The negativity dies at the same point for every length:</p>
+<div class="math">\(\mathcal N(p) = \max\!\big((1-p)^2 - \tfrac12,\ 0\big)\)</div>
+<div class="math">\(p^* = 1 - 1/\sqrt2 \approx 0.293\)</div>
+<p>Why: CZs away from the cut are unitaries acting on one side only, and they commute with \(Z\) errors, so they cannot change the entanglement. Only the two qubits on the cut bond matter. Their state is a mixture of four orthogonal maximally entangled states (each a Bell state up to single-qubit gates) with weights \((1-p)^2\), \(p(1-p)\), \(p(1-p)\), \(p^2\), and such a mixture is entangled only if the largest weight exceeds 1/2 (R. and M. Horodecki, <a href="https://arxiv.org/abs/quant-ph/9607007">arXiv:quant-ph/9607007</a>; <a href="https://doi.org/10.1103/PhysRevA.54.1838">PRA 54, 1838 (1996)</a>).</p>
+<p class="cite">That the entanglement lifetime of a cluster state does not depend on its size: Dür and Briegel, <a href="https://arxiv.org/abs/quant-ph/0307180">arXiv:quant-ph/0307180</a>; <a href="https://doi.org/10.1103/PhysRevLett.92.180403">PRL 92, 180403 (2004)</a>. Hein, Dür and Briegel, <a href="https://arxiv.org/abs/quant-ph/0408165">arXiv:quant-ph/0408165</a>; <a href="https://doi.org/10.1103/PhysRevA.71.032350">PRA 71, 032350 (2005)</a>. Their Eq. (51) gives the same threshold, \(1 - 1/\sqrt2\), for the phase-flip channel on any graph state, as the point where their protocol, which concentrates the entanglement onto two neighbouring qubits, stops working. The negativity curve \(\mathcal N(p)\) above is recomputed in notebook 6.</p>
+<p class="code">In the code: <code>mbqc.noise.dephased_cluster</code> and <code>negativity</code>.</p>
+<p>The negativity across a cut is the coarsest probe. Which multipartite entanglement of a patch survives, the part MBQC actually consumes, is a finer question; <em>localizable entanglement</em>, the entanglement that measuring all other qubits can concentrate onto two chosen ones, is the classic bridge (Popp et al., <a href="https://arxiv.org/abs/quant-ph/0411123">arXiv:quant-ph/0411123</a>; <a href="https://doi.org/10.1103/PhysRevA.71.042306">PRA 71, 042306 (2005)</a>).</p>
+<div class="check"><p class="q">Solve \((1-p)^2 = 1/2\) and check the value of \(p^*\).</p><button type="button">Show answer</button><p class="a" hidden>\(1 - p = 1/\sqrt2\), so \(p = 1 - 1/\sqrt2 \approx 1 - 0.707 = 0.293\).</p></div>
+</article>
+
+<article data-unit="6" data-title="Fusion">
+<p>How do photonic machines build a large cluster? Not in a single step: they make small pieces and join them. <em>Type-I fusion</em> takes an end qubit of each of two graph states and projects them onto \(\{|00\rangle, |11\rangle\}\), merging them into one qubit:</p>
+<div class="math">\(\Pi_{\rm fuse} = |0\rangle\langle 00| + |1\rangle\langle 11|\)</div>
+<div class="tn" data-d="fusion"></div>
+<p>The merged qubit's neighbours are the union of the two old ones. With linear optics (beamsplitters and photon detectors only) it succeeds only half the time. On failure, both qubits are effectively measured in Z, which deletes them (lesson "Z measurements delete vertices").</p>
+<div class="data"><b>Your data</b>Two 3-qubit chains fused end to end: success probability 0.500, and all five stabilizers of the chain \(a_0\)–\(a_1\)–\(m\)–\(b_1\)–\(b_2\) equal 1.0. 200 simulated growth runs follow the line \(3 + 0.5 \times\) attempts. Notebook 6.</div>
+<p>Half the time is still enough. Fusing 3-qubit pieces onto a chain, a success adds 2 qubits and a failure costs 1, so the chain grows on average by</p>
+<div class="math">\(\tfrac12\cdot 2 - \tfrac12\cdot 1 = 0.5\) qubits per attempt.</div>
+<p class="cite">Browne and Rudolph, <a href="https://arxiv.org/abs/quant-ph/0405157">arXiv:quant-ph/0405157</a>; <a href="https://doi.org/10.1103/PhysRevLett.95.010501">PRL 95, 010501 (2005)</a>.</p>
+<p class="code">In the code: <code>mbqc.noise.fuse</code> and <code>grow_chain</code>.</p>
+<div class="check"><p class="q">Why does a success add 2 qubits, not 3, when a 3-qubit piece joins?</p><button type="button">Show answer</button><p class="a" hidden>Fusion merges two qubits, the chain's end and the piece's end, into one: \(3 - 1 = 2\) new qubits.</p></div>
+</article>
+
+<article data-unit="6" data-title="GKP qubits and squeezing">
+<p>How does a qubit stored in an oscillator fail, and what does squeezing buy? Xanadu's qubits are <em>GKP qubits</em>, stored in the position \(q\) of an oscillator (a mode of light; \(q\) and its partner, the momentum \(p\), are its two <em>quadratures</em>). \(|0\rangle\) is a comb of peaks at even multiples of \(\sqrt\pi\), \(|1\rangle\) a comb at odd multiples. Noise shifts \(q\) by a small random \(\delta\). Error correction rounds \(q\) to the nearest multiple of \(\sqrt\pi\), which fails when \(|\delta|\) is closer to an odd multiple than to an even one.</p>
+<p>Real peaks have a finite width. <em>Squeezing</em> narrows the noise in \(q\) below that of the vacuum (variance 1/2), and is quoted in decibels. The peaks and the noise are Gaussian with standard deviation \(\sigma\), set by the squeezing level:</p>
+<div class="math">\(\text{dB} = 10\log_{10}(\sigma_{\rm vac}^2/\sigma^2), \qquad \sigma = \sqrt{\tfrac12\,10^{-\text{dB}/10}}\)</div>
+<p>The logical error rate is the Gaussian weight that lands in the wrong bins, so it falls off like a Gaussian tail.</p>
+<div class="data"><b>Your data</b>Logical error rate for one quadrature (\(q\) and \(p\) are corrected separately): about \(1.2\times10^{-2}\) at 6 dB, \(7.4\times10^{-5}\) at 10 dB (\(\sigma = 0.224\)), \(3.4\times10^{-10}\) at 14 dB. A Monte Carlo over 200,000 random shifts agrees. Notebook 6 (plot).</div>
+<p><strong>Squeezing is the key hardware figure</strong>: each few dB buys orders of magnitude in error rate.</p>
+<p class="cite">Gottesman, Kitaev and Preskill, <a href="https://arxiv.org/abs/quant-ph/0008040">arXiv:quant-ph/0008040</a>; <a href="https://doi.org/10.1103/PhysRevA.64.012310">PRA 64, 012310 (2001)</a>. Bourassa et al., <a href="https://arxiv.org/abs/2010.02905">arXiv:2010.02905</a>; <a href="https://doi.org/10.22331/q-2021-02-04-392">Quantum 5, 392 (2021)</a>.</p>
+<p class="code">In the code: <code>mbqc.noise.gkp_error_probability</code>.</p>
+<div class="check"><p class="q">At 10 dB, \(\sigma = 0.224\). How many standard deviations is the first wrong bin, at \(\sqrt\pi/2 \approx 0.886\)?</p><button type="button">Show answer</button><p class="a" hidden>\(0.886/0.224 \approx 4\). The two-sided Gaussian tail beyond 4σ is about \(6\times10^{-5}\), close to the exact \(7.4\times10^{-5}\).</p></div>
+</article>
+
+<article data-unit="6" data-title="Where to go next">
+<p>Where next? You now know the whole idea: a fixed entangled resource, single-qubit measurements, and a Pauli frame that keeps the randomness in check. Where to read further:</p>
+<ul>
+<li><strong>A review</strong> of measurement-based quantum computation: Briegel et al. <a href="https://arxiv.org/abs/0910.1116">arXiv:0910.1116</a>; <a href="https://doi.org/10.1038/nphys1157">Nat. Phys. 5, 19 (2009)</a>.</li>
+<li><strong>Flow and determinism</strong>: when a pattern can run deterministically, Danos and Kashefi <a href="https://arxiv.org/abs/quant-ph/0506062">arXiv:quant-ph/0506062</a>; <a href="https://doi.org/10.1103/PhysRevA.74.052310">PRA 74, 052310 (2006)</a>; the measurement calculus, <a href="https://arxiv.org/abs/0704.1263">arXiv:0704.1263</a>; <a href="https://doi.org/10.1145/1219092.1219096">J. ACM 54, 8 (2007)</a>.</li>
+<li><strong>Fault tolerance</strong> from a 3D cluster that encodes an error-correcting code (the <em>surface code</em>, which stores one qubit in many and spots errors by checking stabilizers): Raussendorf, Harrington and Goyal <a href="https://arxiv.org/abs/quant-ph/0510135">arXiv:quant-ph/0510135</a>; <a href="https://doi.org/10.1016/j.aop.2006.01.012">Ann. Phys. 321, 2242 (2006)</a>. Its error-correcting part uses Pauli measurements only, so errors stay Pauli errors the code can catch (lesson "A Z error is a flipped outcome"). The non-Clifford gates come in through specially prepared input qubits, <em>magic states</em>: Bravyi and Kitaev <a href="https://arxiv.org/abs/quant-ph/0403025">arXiv:quant-ph/0403025</a>; <a href="https://doi.org/10.1103/PhysRevA.71.022316">PRA 71, 022316 (2005)</a>.</li>
+<li><strong>Photonic architectures</strong>: Xanadu's blueprint, Bourassa et al. <a href="https://arxiv.org/abs/2010.02905">arXiv:2010.02905</a>; <a href="https://doi.org/10.22331/q-2021-02-04-392">Quantum 5, 392 (2021)</a>; fusion-based computation, Bartolucci et al. <a href="https://arxiv.org/abs/2101.09310">arXiv:2101.09310</a>; <a href="https://doi.org/10.1038/s41467-023-36493-1">Nat. Commun. 14, 912 (2023)</a>.</li>
+<li><strong>Blind quantum computation</strong> on the brickwork state, where the server never learns the angles: Broadbent, Fitzsimons and Kashefi <a href="https://arxiv.org/abs/0807.4154">arXiv:0807.4154</a>; <a href="https://doi.org/10.1109/FOCS.2009.36">FOCS 2009, 517</a>.</li>
+<li><strong>Multipartite entanglement of the resource</strong>: localizable entanglement, Popp et al. <a href="https://arxiv.org/abs/quant-ph/0411123">arXiv:quant-ph/0411123</a>; <a href="https://doi.org/10.1103/PhysRevA.71.042306">PRA 71, 042306 (2005)</a>.</li>
+</ul>
+<p>To run everything in this course, open the notebooks in <code>mbqc-course</code>, starting with <code>00_start_here</code>. Each one checks every claim numerically.</p>
+<div class="check"><p class="q">In one sentence, what makes MBQC deterministic despite random outcomes?</p><button type="button">Show answer</button><p class="a" hidden>Every random outcome only adds a known Pauli byproduct, which is tracked in the Pauli frame, used to flip later angles, and undone at the end.</p></div>
+</article>
+
+</div>
+</div>
+
+<script>
+window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+<script>
+(function () {
+  const row = (ids, xs, y, extra) => ids.map((id, i) => Object.assign({ id, x: xs[i], y }, extra ? extra(i) : {}));
+  const chain = (ids) => ids.slice(1).map((id, i) => [ids[i], id]);
+  const DIAGRAMS = {
+    cluster35: { w: 340, h: 160, alt: "a 3 by 5 cluster state: 15 qubits on a grid, with a CZ on every horizontal and vertical edge",
+      nodes: [0, 1, 2].flatMap((r) => [0, 1, 2, 3, 4].map((c) => ({ id: `n${r}${c}`, x: 50 + 60 * c, y: 28 + 46 * r, tone: "soft" }))),
+      edges: [0, 1, 2].flatMap((r) => [0, 1, 2, 3].map((c) => [`n${r}${c}`, `n${r}${c + 1}`]))
+        .concat([0, 1].flatMap((r) => [0, 1, 2, 3, 4].map((c) => [`n${r}${c}`, `n${r + 1}${c}`]))),
+      texts: [{ x: 170, y: 154, t: "dot: a qubit in |+⟩ · line: a CZ gate", small: 1 }] },
+    basic_move: { w: 340, h: 96, alt: "the basic move: psi on qubit 0 joined by a CZ to plus on qubit 1; after measuring qubit 0 at angle theta, qubit 1 holds X to the s times J of theta times psi",
+      nodes: [{ id: "a", x: 50, y: 42, t: "ψ" }, { id: "b", x: 140, y: 42, t: "+", tone: "soft" },
+        { id: "a2", x: 240, y: 42, tone: "gone" }, { id: "b2", x: 300, y: 42, t: "out", tone: "centre" }],
+      edges: [["a", "b", "CZ"]],
+      texts: [{ x: 50, y: 86, t: "measure at θ", small: 1 }, { x: 140, y: 86, t: "qubit 1", small: 1 }, { x: 192, y: 48, t: "→" },
+        { x: 240, y: 86, t: "gone", small: 1 }, { x: 300, y: 86, t: "Xˢ J(θ)|ψ⟩", small: 1 }] },
+    wire5: { w: 340, h: 96, alt: "a 5-qubit wire: psi on the first qubit, plus on the next three, the output on the last; measurement angles 0, minus a, minus b, minus c",
+      nodes: row(["q0", "q1", "q2", "q3", "q4"], [40, 105, 170, 235, 300], 38, (i) => ({ t: ["ψ", "+", "+", "+", "out"][i], tone: ["accent", "soft", "soft", "soft", "centre"][i] })),
+      edges: chain(["q0", "q1", "q2", "q3", "q4"]),
+      texts: ["θ = 0", "−a", "−b", "−c", "U|ψ⟩"].map((t, i) => ({ x: 40 + 65 * i, y: 82, t, small: 1 })) },
+    stab: { w: 340, h: 104, alt: "the stabilizer of qubit 2 on a 5-qubit line: X on qubit 2 and Z on its two neighbours",
+      nodes: row(["s0", "s1", "s2", "s3", "s4"], [40, 105, 170, 235, 300], 50, (i) => ({ t: String(i), tone: i === 2 ? "accent" : i === 1 || i === 3 ? "soft" : "" })),
+      edges: chain(["s0", "s1", "s2", "s3", "s4"]),
+      texts: [{ x: 105, y: 24, t: "Z" }, { x: 170, y: 24, t: "X" }, { x: 235, y: 24, t: "Z" }, { x: 170, y: 96, t: "K₂ = Z₁ X₂ Z₃", small: 1 }] },
+    cut2d: { w: 340, h: 160, alt: "a 3 by 3 cluster with the left column boxed as region A: three edges cross the cut, so A carries 3 bits",
+      boxes: [{ x: 85, y: 8, w: 50, h: 144 }],
+      nodes: [0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => ({ id: `g${r}${c}`, x: 110 + 55 * c, y: 30 + 50 * r, tone: c === 0 ? "soft" : "" }))),
+      edges: [0, 1, 2].flatMap((r) => [0, 1].map((c) => [`g${r}${c}`, `g${r}${c + 1}`]))
+        .concat([0, 1].flatMap((r) => [0, 1, 2].map((c) => [`g${r}${c}`, `g${r + 1}${c}`]))),
+      texts: [{ x: 66, y: 86, t: "A" }, { x: 290, y: 76, t: "3 edges cross", small: 1 }, { x: 290, y: 94, t: "S(A) = 3 bits", small: 1 }] },
+    zdel: { w: 340, h: 156, alt: "measuring the middle qubit of a 5-qubit line in Z deletes it, leaving two 2-qubit clusters, with a Z to the s byproduct on qubits 1 and 3",
+      nodes: row(["t0", "t1", "t2", "t3", "t4"], [50, 110, 170, 230, 290], 38, (i) => ({ t: String(i), tone: i === 2 ? "accent" : "" }))
+        .concat(row(["b0", "b1", "b2", "b3", "b4"], [50, 110, 170, 230, 290], 116, (i) => ({ t: i === 2 ? "" : String(i), tone: i === 2 ? "gone" : i === 1 || i === 3 ? "centre" : "" }))),
+      edges: chain(["t0", "t1", "t2", "t3", "t4"]).concat([["b0", "b1"], ["b3", "b4"]]),
+      texts: [{ x: 170, y: 14, t: "measure Z, outcome s", small: 1 }, { x: 170, y: 84, t: "↓" }, { x: 110, y: 150, t: "Zˢ", small: 1 }, { x: 230, y: 150, t: "Zˢ", small: 1 }] },
+    patch23: { w: 340, h: 156, alt: "the CNOT patch: a 2 by 3 cluster; the top corners are deleted by Z measurements, the control sits top middle, the target walks along the bottom row from t0 to t2",
+      nodes: [{ id: "z0", x: 90, y: 35, t: "Z", tone: "soft" }, { id: "c", x: 170, y: 35, t: "c", tone: "centre" }, { id: "z2", x: 250, y: 35, t: "Z", tone: "soft" },
+        { id: "t0", x: 90, y: 110, t: "t₀" }, { id: "t1", x: 170, y: 110, t: "t₁" }, { id: "t2", x: 250, y: 110, t: "t₂", tone: "centre" }],
+      edges: [["z0", "c"], ["c", "z2"], ["t0", "t1"], ["t1", "t2"], ["z0", "t0"], ["c", "t1", "CZ"], ["z2", "t2"]],
+      texts: [{ x: 280, y: 40, t: "control", a: "start", small: 1 }, { x: 280, y: 115, t: "target", a: "start", small: 1 },
+        { x: 170, y: 150, t: "Z: deleted by a Z measurement · amber: outputs", small: 1 }] },
+    compile: { w: 340, h: 128, alt: "a compiled pattern: two horizontal wires, one new vertex per J gate, and a rung for a CZ between the wires",
+      nodes: row(["a0", "a1", "a2", "a3", "a4"], [40, 100, 160, 220, 280], 32, (i) => ({ t: i === 0 ? "in" : i === 4 ? "out" : "", tone: i === 4 ? "centre" : i === 0 ? "" : "soft" }))
+        .concat(row(["b0", "b1", "b2", "b3", "b4"], [40, 100, 160, 220, 280], 92, (i) => ({ t: i === 0 ? "in" : i === 4 ? "out" : "", tone: i === 4 ? "centre" : i === 0 ? "" : "soft" }))),
+      edges: chain(["a0", "a1", "a2", "a3", "a4"]).concat(chain(["b0", "b1", "b2", "b3", "b4"]), [["a2", "b2", "CZ"]]),
+      texts: [{ x: 318, y: 37, t: "q₀", a: "start", small: 1 }, { x: 318, y: 97, t: "q₁", a: "start", small: 1 }, { x: 165, y: 124, t: "one new vertex per J · one rung per CZ", small: 1 }] },
+    fusion: { w: 340, h: 156, alt: "type-I fusion: two 3-qubit chains whose end qubits a2 and b0 merge into one qubit m, giving a 5-qubit chain",
+      nodes: [{ id: "a0", x: 30, y: 35, t: "a₀" }, { id: "a1", x: 80, y: 35, t: "a₁" }, { id: "a2", x: 130, y: 35, t: "a₂", tone: "accent" },
+        { id: "b0", x: 210, y: 35, t: "b₀", tone: "accent" }, { id: "b1", x: 260, y: 35, t: "b₁" }, { id: "b2", x: 310, y: 35, t: "b₂" }]
+        .concat(row(["c0", "c1", "m", "c3", "c4"], [70, 120, 170, 220, 270], 115, (i) => ({ t: ["a₀", "a₁", "m", "b₁", "b₂"][i], tone: i === 2 ? "accent" : "" }))),
+      edges: [["a0", "a1"], ["a1", "a2"], ["b0", "b1"], ["b1", "b2"]].concat(chain(["c0", "c1", "m", "c3", "c4"])),
+      texts: [{ x: 170, y: 40, t: "fuse", small: 1 }, { x: 170, y: 82, t: "↓" }, { x: 170, y: 150, t: "on success (probability 1/2)", small: 1 }] },
+  };
+  // ---- Tensor-network diagrams -------------------------------------------------
+  // Each diagram is a small spec: nodes (qubits), edges (CZ bonds),
+  // legs (open lines), plus optional raw lines, paths, dashed boxes and text.
+  const R = 15; // node half-size in px
+  const SHAPES = {
+    circle: (n) => `<circle cx="${n.x}" cy="${n.y}" r="${R}"/>`,
+    square: (n) => `<rect x="${n.x - R + 2}" y="${n.y - R + 2}" width="${2 * R - 4}" height="${2 * R - 4}" rx="3"/>`,
+    diamond: (n) => `<polygon points="${n.x},${n.y - R} ${n.x + R},${n.y} ${n.x},${n.y + R} ${n.x - R},${n.y}"/>`,
+    triR: (n) => `<polygon points="${n.x - R},${n.y - R} ${n.x + R},${n.y} ${n.x - R},${n.y + R}"/>`,
+    triL: (n) => `<polygon points="${n.x + R},${n.y - R} ${n.x - R},${n.y} ${n.x + R},${n.y + R}"/>`,
+    box: (n) => `<rect x="${n.x - n.w / 2}" y="${n.y - R}" width="${n.w}" height="${2 * R}" rx="6"/>`,
+    env: (n) => `<rect x="${n.x - 13}" y="${n.y - n.h / 2}" width="26" height="${n.h}" rx="6"/>`,
+  };
+  const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function drawDiagram(d) {
+    const by = Object.fromEntries((d.nodes || []).map((n) => [n.id, n]));
+    let out = "";
+    for (const b of d.boxes || [])
+      out += `<rect class="tn-box${b.c ? " " + b.c : ""}" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="8"/>` +
+        (b.t ? `<text class="tn-boxlabel${b.c ? " " + b.c : ""}" x="${b.x + 4}" y="${b.y - 5}">${esc(b.t)}</text>` : "");
+    for (const p of d.paths || []) out += `<path class="tn-line" d="${p}"/>`;
+    for (const l of d.lines || []) out += `<line class="tn-line${l[4] ? " thick" : ""}" x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}"/>`;
+    for (const e of d.edges || []) {
+      const a = by[e[0]], b = by[e[1]];
+      out += `<line class="tn-line${e[3] ? " thick" : ""}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`;
+      if (e[2]) out += `<text class="tn-idx" x="${(a.x + b.x) / 2 + (a.y === b.y ? 0 : 7)}" y="${(a.y + b.y) / 2 + (a.y === b.y ? -6 : 4)}" text-anchor="${a.y === b.y ? "middle" : "start"}">${esc(e[2])}</text>`;
+    }
+    for (const g of d.legs || []) {
+      const n = by[g[0]], x2 = n.x + g[1], y2 = n.y + g[2];
+      out += `<line class="tn-line${g[4] ? " thick" : ""}" x1="${n.x}" y1="${n.y}" x2="${x2}" y2="${y2}"/>`;
+      if (g[3]) {
+        const anchor = g[1] > 0 && g[2] === 0 ? "start" : g[1] < 0 && g[2] === 0 ? "end" : "middle";
+        const lx = x2 + (anchor === "start" ? 4 : anchor === "end" ? -4 : 0);
+        const ly = y2 + (g[2] > 0 ? 13 : g[2] < 0 ? -5 : 4);
+        out += `<text class="tn-idx" x="${lx}" y="${ly}" text-anchor="${anchor}">${esc(g[3])}</text>`;
+      }
+    }
+    for (const n of d.nodes || []) {
+      out += `<g class="tn-node ${n.tone || ""}">${SHAPES[n.s || "circle"](n)}</g>`;
+      if (n.t) {
+        const dx = n.s === "triR" ? -5 : n.s === "triL" ? 5 : 0;
+        out += `<text class="tn-label${n.tone === "accent" ? " on-accent" : ""}${String(n.t).length > 2 && n.s !== "box" ? " tight" : ""}" x="${n.x + dx}" y="${n.y + 4.5}" text-anchor="middle">${esc(n.t)}</text>`;
+      }
+    }
+    for (const t of d.texts || [])
+      out += `<text class="tn-text${t.small ? " small" : ""}" x="${t.x}" y="${t.y}" text-anchor="${t.a || "middle"}">${esc(t.t)}</text>`;
+    return `<svg viewBox="0 0 ${d.w} ${d.h}" width="${d.w}" role="img" aria-label="${esc(d.alt || "diagram")}">${out}</svg>`;
+  }
+  function renderDiagrams(root) {
+    root.querySelectorAll(".tn[data-d]").forEach((el) => {
+      const d = DIAGRAMS[el.dataset.d];
+      if (d) el.innerHTML = drawDiagram(d);
+    });
+  }
+
+  const units = {
+    0: ["Start here", "Computing with measurements only: the idea in four lessons."],
+    1: ["Graph states", "The entangled resource: how to make it, describe it and cut it into shape."],
+    2: ["Teleportation and feedforward", "One measurement moves a qubit and applies a gate; random outcomes are tracked, not fixed."],
+    3: ["Single-qubit rotations", "Any single-qubit gate from four measurements on a wire."],
+    4: ["CNOT on a 2D patch", "Two-qubit gates come from the edges between wires."],
+    5: ["Universality and circuits", "Compiling any circuit into measurements, and which ones must wait."],
+    6: ["Photonics, fusion and noise", "How hardware builds the resource, and what noise does to it."],
+  };
+  const $ = (id) => document.getElementById(id);
+  const lessons = Array.from(document.querySelectorAll("#lessons article"));
+  const total = lessons.length;
+  $("nLessons").textContent = String(total);
+  $("pos").textContent = `1 / ${total}`;
+  // Progress is stored by lesson title, so adding lessons later keeps the ticks in place.
+  const titles = lessons.map((el) => el.dataset.title);
+  const KEY = "mbqc-pocket-v1";
+  let state = { done: [], last: titles[0] };
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && Array.isArray(s.done)) state = s;
+  } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+  const isDone = (i) => state.done.includes(titles[i]);
+
+  const home = $("home"), reader = $("reader"), stage = $("stage");
+  let current = 0;
+
+  function renderHome() {
+    const box = $("units");
+    box.innerHTML = "";
+    Object.keys(units).forEach((u) => {
+      const sec = document.createElement("div");
+      sec.className = "unit";
+      sec.innerHTML = `<h2>Part ${u} · ${units[u][0]}</h2><p class="blurb">${units[u][1]}</p>`;
+      lessons.forEach((el, i) => {
+        if (el.dataset.unit !== u) return;
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "row" + (isDone(i) ? " is-done" : "");
+        b.innerHTML = `<span class="n">${i + 1}</span><span class="t">${el.dataset.title}</span><span class="mark" aria-label="${isDone(i) ? "done" : "not done"}"></span>`;
+        b.addEventListener("click", () => open(i));
+        sec.appendChild(b);
+      });
+      box.appendChild(sec);
+    });
+    const n = titles.filter((t) => state.done.includes(t)).length;
+    $("bar").style.width = (100 * n / total) + "%";
+    $("count").textContent = `${n} of ${total} done`;
+    let next = 0;
+    while (next < total && isDone(next)) next++;
+    if (next >= total) next = Math.max(0, titles.indexOf(state.last));
+    const c = $("continue");
+    c.innerHTML = (n === 0 ? "Start with lesson 1" : n === total ? "Review: lesson " + (next + 1) : "Continue: lesson " + (next + 1)) + `<span>${lessons[next].dataset.title}</span>`;
+    c.onclick = () => open(next);
+  }
+
+  function typeset(el) {
+    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(() => {});
+    else setTimeout(() => typeset(el), 300);
+  }
+
+  // ---- The traced wire run (notebook 3), one frame per measurement --------------
+  // m: qubits before m are measured; used: angle used on each measured qubit;
+  // chips: Pauli frame written under each qubit; fresh: the chip written in this frame.
+  const WIRE_X = [40, 105, 170, 235, 300];
+  const wireStages = [
+    { m: 0, used: [], chips: [], fresh: -1,
+      cap: "<b>Start.</b> \\(|\\psi\\rangle\\) on qubit 0, \\(|+\\rangle\\) on qubits 1 to 4, a CZ between neighbours. The wanted angles are \\((0, -a, -b, -c) = (0, -3.100, -0.902, +3.130)\\). No byproducts yet." },
+    { m: 1, used: ["+0.000"], chips: [null, "X¹Z⁰"], fresh: 1,
+      cap: "<b>Measure qubit 0</b> at 0, as wanted: an angle of 0 never needs flipping. Outcome \\(s = 1\\). The state moves to qubit 1 with byproduct \\(X^1Z^0\\)." },
+    { m: 2, used: ["+0.000", "+3.100"], chips: [null, "X¹Z⁰", "X⁰Z¹"], fresh: 2,
+      cap: "<b>Measure qubit 1.</b> It carries an \\(X\\), so the angle is flipped: \\(+3.100\\) instead of \\(-3.100\\). Outcome \\(s = 0\\). The update \\((x, z) \\to (z \\oplus s, x) = (0, 1)\\) gives qubit 2 the byproduct \\(X^0Z^1\\)." },
+    { m: 3, used: ["+0.000", "+3.100", "−0.902"], chips: [null, "X¹Z⁰", "X⁰Z¹", "X¹Z⁰"], fresh: 3,
+      cap: "<b>Measure qubit 2.</b> Only a \\(Z\\), so no flip: \\(-0.902\\), as wanted. Outcome \\(s = 0\\). The update gives \\((1 \\oplus 0, 0) = (1, 0)\\): qubit 3 gets \\(X^1Z^0\\)." },
+    { m: 4, used: ["+0.000", "+3.100", "−0.902", "−3.130"], chips: [null, "X¹Z⁰", "X⁰Z¹", "X¹Z⁰", "X¹Z¹"], fresh: 4,
+      cap: "<b>Measure qubit 3.</b> It carries an \\(X\\): \\(-3.130\\) instead of \\(+3.130\\). Outcome \\(s = 1\\). The update gives \\((0 \\oplus 1, 1) = (1, 1)\\): the output qubit 4 gets \\(X^1Z^1\\)." },
+    { m: 4, used: ["+0.000", "+3.100", "−0.902", "−3.130"], chips: [null, "X¹Z⁰", "X⁰Z¹", "X¹Z⁰", "X⁰Z⁰"], fresh: 4,
+      cap: "<b>Undo once, at the end.</b> Apply \\(X\\), then \\(Z\\), to qubit 4. Its frame is now clear, and it holds \\(U|\\psi\\rangle\\) with fidelity 1.0. Two of the four angles had to be flipped; nothing was corrected on the spot." },
+  ];
+  function wireDiagram(S) {
+    const nodes = WIRE_X.map((x, i) => ({ id: "w" + i, x, y: 44, t: i < S.m ? "" : String(i),
+      tone: i < S.m ? "gone" : i === S.m ? "accent" : "soft" }));
+    const edges = [];
+    for (let i = Math.max(S.m, 0); i < 4; i++) edges.push(["w" + i, "w" + (i + 1)]);
+    const texts = S.used.map((t, i) => ({ x: WIRE_X[i], y: 16, t, small: 1 }));
+    let svg = drawDiagram({ w: 340, h: 100, alt: "the 5-qubit wire during the traced run, with the measured qubits, the angles used and the Pauli frame under each qubit", nodes, edges, texts });
+    let chips = "";
+    S.chips.forEach((t, i) => {
+      if (!t) return;
+      const cls = i === S.fresh ? "new" : i < S.m ? "old" : "";
+      chips += `<g class="chip ${cls}"><rect x="${WIRE_X[i] - 26}" y="70" width="52" height="20" rx="5"/><text x="${WIRE_X[i]}" y="84" text-anchor="middle">${esc(t)}</text></g>`;
+    });
+    return svg.replace("</svg>", chips + "</svg>");
+  }
+  function initStepper(el) {
+    const st = wireStages;
+    let k = 0, timer = null;
+    el.innerHTML = `<div class="tn pic"></div><div class="cap"></div><div class="ctl"><button type="button" data-a="prev">←</button><button type="button" data-a="next">→</button><button type="button" data-a="play">Play</button><span class="n"></span></div><div class="key">Circles are the qubits of the wire; the filled one holds the logical state. Dashed circles have been measured, with the angle used written above. The chip under a qubit is its Pauli frame \\(X^xZ^z\\): filled when just written, dashed once that qubit is measured.</div>`;
+    const pic = el.querySelector(".pic"), cap = el.querySelector(".cap"), n = el.querySelector(".n"), play = el.querySelector('[data-a="play"]');
+    function draw() {
+      const S = st[k];
+      pic.innerHTML = wireDiagram(S);
+      cap.innerHTML = S.cap;
+      n.textContent = `${k + 1} / ${st.length}`;
+      typeset(cap);
+    }
+    function stop() { clearInterval(timer); timer = null; play.textContent = "Play"; }
+    el.querySelector(".ctl").addEventListener("click", (ev) => {
+      const a = ev.target.dataset.a;
+      if (a === "prev") { stop(); k = Math.max(0, k - 1); draw(); }
+      if (a === "next") { stop(); k = Math.min(st.length - 1, k + 1); draw(); }
+      if (a === "play") {
+        if (timer) { stop(); return; }
+        if (k === st.length - 1) k = 0;
+        play.textContent = "Pause"; draw();
+        timer = setInterval(() => { if (k >= st.length - 1 || !el.isConnected) { stop(); return; } k++; draw(); }, 3000);
+      }
+    });
+    draw();
+    typeset(el.querySelector(".key"));
+  }
+
+  function open(i) {
+    current = i;
+    state.last = titles[i]; save();
+    const src = lessons[i];
+    stage.innerHTML = `<div class="lesson"><div class="unitname">Part ${src.dataset.unit} · ${units[src.dataset.unit][0]}</div><h2>${src.dataset.title}</h2>${src.innerHTML}</div>`;
+    stage.querySelectorAll(".check button").forEach((b) => {
+      b.addEventListener("click", () => {
+        const a = b.nextElementSibling;
+        a.hidden = !a.hidden;
+        b.textContent = a.hidden ? "Show answer" : "Hide answer";
+      });
+    });
+    $("pos").textContent = `${i + 1} / ${total}`;
+    $("prev").disabled = i === 0;
+    $("prev").style.visibility = i === 0 ? "hidden" : "visible";
+    $("next").textContent = i === total - 1 ? "Finish ✓" : "Got it, next →";
+    home.hidden = true; reader.hidden = false;
+    window.scrollTo(0, 0);
+    renderDiagrams(stage);
+    stage.querySelectorAll(".stepper").forEach(initStepper);
+    typeset(stage);
+  }
+
+  function goHome() { reader.hidden = true; home.hidden = false; renderHome(); window.scrollTo(0, 0); }
+
+  $("back").addEventListener("click", goHome);
+  $("prev").addEventListener("click", () => { if (current > 0) open(current - 1); });
+  $("next").addEventListener("click", () => {
+    if (!isDone(current)) { state.done.push(titles[current]); save(); }
+    if (current < total - 1) open(current + 1); else goHome();
+  });
+  $("reset").addEventListener("click", () => { $("resetConfirm").hidden = false; });
+  $("resetNo").addEventListener("click", () => { $("resetConfirm").hidden = true; });
+  $("resetYes").addEventListener("click", () => { state = { done: [], last: titles[0] }; save(); $("resetConfirm").hidden = true; renderHome(); });
+
+  renderHome();
+})();
+</script>
