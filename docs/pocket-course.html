@@ -149,7 +149,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
   <div class="hero">
     <div class="eyebrow">Companion to mbqc-course</div>
     <h1>MBQC Pocket Course</h1>
-    <p><span id="nLessons">Thirty-two</span> short lessons, about two minutes each, from "can a computer run on measurements alone?" to fusion, noise and GKP qubits in photonic hardware. Each one ends with a quick check you can do in your head. The amber boxes show numbers you get by running the code and notebooks in <code>mbqc-course</code>.</p>
+    <p><span id="nLessons">Thirty-one</span> short lessons, about two minutes each, from "can a computer run on measurements alone?" to fusion, noise and GKP qubits in photonic hardware. Each one ends with a quick check you can do in your head. The amber boxes show numbers you get by running the code and notebooks in <code>mbqc-course</code>.</p>
     <div class="progress">
       <div class="bar"><span id="bar"></span></div>
       <small id="count">0 lessons done</small>
@@ -195,7 +195,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <p>CZ flips the sign of the amplitude when both qubits are 1, and does nothing otherwise:</p>
 <div class="math">\(\mathrm{CZ}\,|ab\rangle = (-1)^{ab}\,|ab\rangle\)</div>
 <p>All CZ gates are diagonal, so they commute: the order in which you apply them does not matter. The whole state is fixed by the picture.</p>
-<p>Making this state is the only entangling step in the whole computation. Everything after it is single-qubit measurements. Part 1 looks at this state in detail: its stabilizers, how much entanglement it carries, and how to cut it into shape.</p>
+<p>Part 1 looks at this state in detail: its stabilizers, how much entanglement it carries, and how to cut it into shape.</p>
 <p class="code">In the code: <code>mbqc.graph_state(nodes, grid_edges(3, 5))</code>.</p>
 <div class="check"><p class="q">How many CZ gates make the 3 × 5 cluster in the picture?</p><button type="button">Show answer</button><p class="a" hidden>22: each of the 3 rows has 4 horizontal edges (12), and each of the 5 columns has 2 vertical edges (10).</p></div>
 </article>
@@ -241,11 +241,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 </article>
 
 <article data-unit="1" data-title="The graph-state recipe">
-<p>Which states can serve as the resource? Any graph defines one, by the recipe of "The cluster state". Vertices are qubits, edges say who gets entangled:</p>
-<ul>
-<li>put every qubit in \(|+\rangle\);</li>
-<li>apply CZ on every edge.</li>
-</ul>
+<p>Which states can serve as the resource? Any graph defines one, by the recipe of "The cluster state": vertices are qubits in \(|+\rangle\), edges are CZs.</p>
 <div class="math">\(|G\rangle = \prod_{(a,b)\in E} \mathrm{CZ}_{ab}\; |+\rangle^{\otimes n}\)</div>
 <p>A <em>cluster state</em> is the graph state of a line (1D) or a square lattice (2D).</p>
 <p>The amplitudes are easy to write down. \(|+\rangle^{\otimes n}\) gives every bit string \(x\) the amplitude \(2^{-n/2}\). Each CZ flips the sign when both its ends are 1. So</p>
@@ -287,34 +283,20 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <p>How do you get a graph of a particular shape without making a new one? Carve it out of a big cluster. Measure qubit \(q\) in the Z basis with outcome \(s\). The qubit disappears from the graph, and each of its neighbours picks up a \(Z^s\) byproduct:</p>
 <div class="math">\(|G\rangle \;\to\; \Big(\prod_{b\in N(q)} Z_b^{\,s}\Big)\,|G\setminus q\rangle\)</div>
 <div class="tn" data-d="zdel"></div>
-<p>Why: with qubit \(q\) fixed to \(|s\rangle\), each CZ to \(q\) becomes either nothing (\(s = 0\)) or a \(Z\) on the neighbour (\(s = 1\)). The byproducts are known, so they can be undone or tracked.</p>
+<p>Why: with qubit \(q\) fixed to \(|s\rangle\), each CZ to \(q\) becomes either nothing (\(s = 0\)) or a \(Z\) on the neighbour (\(s = 1\)).</p>
 <div class="data"><b>Your data</b>5-qubit line, measure qubit 2 in Z: outcome 1. The new graph is the edges (0, 1) and (3, 4), with \(\langle K_0\rangle = +1\), \(\langle K_1\rangle = -1\), \(\langle K_3\rangle = -1\), \(\langle K_4\rangle = +1\), and 0 entanglement between the halves. Notebook 1.</div>
 <p>The two \(-1\)s are the \(Z\) byproducts on qubits 1 and 3: a \(Z\) anticommutes with the \(X\) in their stabilizers. <strong>A large 2D cluster is a blank canvas</strong>: carve the graph you need with Z measurements and compute on the rest.</p>
 <p class="code">In the code: <code>state.measure_z(2)</code>.</p>
 <div class="check"><p class="q">Which stabilizer signs would you see if the Z outcome had been 0?</p><button type="button">Show answer</button><p class="a" hidden>All \(+1\). With \(s = 0\) there is no byproduct, and the two pieces are plain 2-qubit clusters.</p></div>
 </article>
 
-<article data-unit="2" data-title="The central calculation">
-<p>Why does the basic move of "One measurement is a gate" work? Here is its calculation once more, compactly, since everything else repeats it.</p>
-<p>Write \(|\psi\rangle = a|0\rangle + b|1\rangle\) on qubit 0. The CZ leaves the \(|0\rangle\) part alone and applies \(Z\) to qubit 1 in the \(|1\rangle\) part, turning \(|+\rangle\) into \(|-\rangle\):</p>
-<div class="math">\(\mathrm{CZ}\,|\psi\rangle|+\rangle = a|0\rangle|+\rangle + b|1\rangle|-\rangle\)</div>
-<p>Now project qubit 0 onto \(\langle\pm_\theta| = (\langle 0| \pm e^{-i\theta}\langle 1|)/\sqrt2\). Qubit 1 is left in (unnormalized)</p>
-<div class="math">\(\tfrac{1}{\sqrt2}\left(a|+\rangle \pm e^{-i\theta}\, b|-\rangle\right)\)</div>
-<div class="math">\(= \tfrac{1}{\sqrt2}\,H\left(a|0\rangle \pm e^{-i\theta} b|1\rangle\right)\)</div>
-<p>For \(+\) the bracket is \(P(-\theta)|\psi\rangle\). For \(-\) it is \(Z P(-\theta)|\psi\rangle\), and \(HZ = XH\). Together, after normalizing:</p>
-<div class="math">\(|\text{out}\rangle = X^s\, H\, P(-\theta)\,|\psi\rangle = X^s J(\theta)|\psi\rangle\)</div>
-<p>Three things happened: the state <strong>moved</strong> from qubit 0 to qubit 1 (teleportation), a <strong>gate</strong> \(J(\theta)\) was applied, chosen by the angle, and a random but known <strong>byproduct</strong> \(X^s\) appeared.</p>
+<article data-unit="2" data-title="Teleportation with a coin flip">
+<p>Does the outcome of one measurement tell us anything about \(|\psi\rangle\)? No. Take the basic move, \(X^s J(\theta)|\psi\rangle\) with \(J(\theta) = H P(-\theta)\) (lesson "One measurement is a gate"), and read it as three things: the state <strong>moved</strong> from qubit 0 to qubit 1 (teleportation), a <strong>gate</strong> \(J(\theta)\) was applied, chosen by the angle, and a random but known <strong>byproduct</strong> \(X^s\) appeared.</p>
 <div class="data"><b>Your data</b>A random \(|\psi\rangle\), \(\theta = 0.9\), both outcomes forced: fidelity with \(X^sJ(\theta)|\psi\rangle\) is 1.000000000000 for \(s = 0\) and for \(s = 1\). Notebook 2.</div>
-<p class="cite">Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>; Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0603226">arXiv:quant-ph/0603226</a>.</p>
-<div class="check"><p class="q">Why does the formula have \(P(-\theta)\), with a minus sign, when you measure at \(+\theta\)?</p><button type="button">Show answer</button><p class="a" hidden>Projecting onto \(\langle +_\theta|\) uses the complex conjugate of \(e^{i\theta}\), so the \(|1\rangle\) part of \(\psi\) picks up \(e^{-i\theta}\).</p></div>
-</article>
-
-<article data-unit="2" data-title="Why the outcome is a coin flip">
-<p>Does the outcome tell us anything about \(|\psi\rangle\)? Each branch of the last lesson has squared norm \((|a|^2 + |b|^2)/2 = 1/2\). So <strong>each outcome has probability exactly 1/2, for every input state</strong>.</p>
-<p>That is essential. If the probabilities depended on \(|\psi\rangle\), the measurement would have learned something about \(|\psi\rangle\), and so disturbed it. Here it learns nothing, and the state passes through intact.</p>
-<p>The price is randomness: half the time you get \(J|\psi\rangle\), half the time \(XJ|\psi\rangle\). If you ignore which, the output is a 50/50 mixture of the two. \(X\) flips the Y and Z components of the Bloch vector \((\langle X\rangle, \langle Y\rangle, \langle Z\rangle)\) (lesson "One measurement is a gate") and keeps the X component, so the mixture keeps only the X component.</p>
+<p>Each outcome has probability 1/2 for every input (same lesson), so the state passes through intact. The price is randomness: half the time you get \(J|\psi\rangle\), half the time \(XJ|\psi\rangle\). If you ignore which, the output is a 50/50 mixture of the two. \(X\) flips the Y and Z components of the Bloch vector and keeps the X component, so the mixture keeps only the X component.</p>
 <div class="data"><b>Your data</b>\(\theta = 0.9\): \(P(s=0), P(s=1) = 0.5, 0.5\) for three random inputs. The ideal Bloch vector of \(J|\psi\rangle\) is \((-0.848, -0.3564, 0.3921)\); ignoring the outcome gives \((-0.848, 0, 0)\). Notebook 2.</div>
 <p><strong>Keeping track of the outcome is not optional.</strong> Without it, the computation turns into noise after one step.</p>
+<p class="cite">Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>; Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0603226">arXiv:quant-ph/0603226</a>.</p>
 <div class="check"><p class="q">If you ignore the outcome, which input states still come out right?</p><button type="button">Show answer</button><p class="a" hidden>Those with \(J|\psi\rangle\) on the X axis of the Bloch sphere, \(|\pm\rangle\), since \(X\) leaves them unchanged (up to a sign that is a global phase).</p></div>
 </article>
 
@@ -324,7 +306,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <li><code>pennylane.ftqc.measure_arbitrary_basis(wire, angle=theta, plane="XY")</code> measures in the basis \(|\pm_\theta\rangle\), with the same angle convention as this course;</li>
 <li><code>qml.cond(m, qml.X)(wire)</code> applies \(X\) on the next qubit only if the outcome \(m\) is 1, undoing the byproduct on the spot.</li>
 </ul>
-<p>That conditional \(X\) is a simulator shortcut. MBQC itself has no gate to apply it; it tracks the byproduct instead and adapts the later angles to it, which is the feedforward of lesson 1 (the next two lessons). On a single step both give the same output.</p>
+<p>That conditional \(X\) is a simulator shortcut: MBQC has no gate for it, and instead tracks the byproduct and adapts the later angles (the next two lessons). On a single step both give the same output.</p>
 <p>A circuit with mid-circuit measurements cannot return a state vector, so the check compares Bloch vectors on the output wire.</p>
 <div class="data"><b>Your data</b>\(\theta = 0.9\). PennyLane with the conditional \(X\): \((-0.848, -0.3564, 0.3921)\), equal to the NumPy ideal. PennyLane without it: \((-0.848, 0, 0)\), equal to the NumPy result that ignores the outcome. Notebook 2.</div>
 <div class="check"><p class="q">Without <code>qml.cond</code>, which component of the Bloch vector survives, and why?</p><button type="button">Show answer</button><p class="a" hidden>Only the X component, \(-0.848\). The uncorrected \(X^s\) flips Y and Z half the time, so they average to 0.</p></div>
@@ -333,39 +315,39 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <article data-unit="2" data-title="Byproducts flip the next angle">
 <p>What does a leftover byproduct do to the next step? Chain two steps on a 3-qubit line 0–1–2. After measuring qubit 0, qubit 1 holds \(X^{s_0}J(\theta_0)|\psi\rangle\). Measuring qubit 1 applies \(J(\theta_1) = H P(-\theta_1)\), which now has an \(X\) in front of it when \(s_0 = 1\). \(X\) does not commute with the phase gate; moving it through flips the angle:</p>
 <div class="math">\(P(-\theta)\,X = X\,P(+\theta) \quad\text{(up to a global phase)}\)</div>
-<p>So if \(s_0 = 1\), qubit 1 must be measured at \(-\theta_1\) instead of \(\theta_1\). This is an <em>adaptive measurement</em>, and it is the only reason MBQC has a time order at all: qubit 1 cannot be measured before qubit 0's outcome is known.</p>
+<p>So if \(s_0 = 1\), qubit 1 must be measured at \(-\theta_1\) instead of \(\theta_1\). This <em>adaptive measurement</em> is the feedforward of lesson 1: qubit 1 cannot be measured before qubit 0's outcome is known.</p>
 <div class="data"><b>Your data</b>\(\theta_0 = 0.4\), \(\theta_1 = 1.3\), all four branches \((s_0, s_1)\) forced. With adapted angles, fidelity with \(J(\theta_1)J(\theta_0)|\psi\rangle\) is 1 in all four. With fixed angles: \(1, 1, 0.0994, 0.0994\), failing exactly when \(s_0 = 1\). Notebook 2.</div>
 <p class="code">In the code: <code>mbqc.run_wire(psi, [0.4, 1.3], outcomes=o, adaptive=False)</code>.</p>
 <div class="check"><p class="q">Check \(P(-\theta)X = X P(\theta)\) up to phase on the basis state \(|0\rangle\).</p><button type="button">Show answer</button><p class="a" hidden>Left: \(X|0\rangle = |1\rangle\), then \(P(-\theta)\) gives \(e^{-i\theta}|1\rangle\). Right: \(P(\theta)|0\rangle = |0\rangle\), then \(X\) gives \(|1\rangle\). They differ by the phase \(e^{-i\theta}\), the same one for \(|1\rangle\).</p></div>
 </article>
 
 <article data-unit="2" data-title="The Pauli frame">
-<p>How do we live with byproducts we cannot undo? Undoing each one as soon as it appears would need a gate, which MBQC does not have. So byproducts are never undone on the spot. They are <em>tracked</em> as two bits per qubit, \((x, z)\), meaning the actual state is \(X^xZ^z\) times the ideal one. This record is the <em>Pauli frame</em>. Three rules run it:</p>
+<p>How do we live with byproducts we cannot undo? With no gate to undo them on the spot, they are <em>tracked</em> as two bits per qubit, \((x, z)\), meaning the actual state is \(X^xZ^z\) times the ideal one. This record is the <em>Pauli frame</em>. Three rules run it:</p>
 <ul>
 <li><strong>Measure</strong> at \((-1)^x\,\theta\): flip the angle if the qubit carries an \(X\).</li>
 <li><strong>Update.</strong> With the angle already flipped by rule 1, \(J\) swaps \(X\) and \(Z\) (formula below), and the measurement adds \(X^s\). With outcome \(s\), the next qubit's frame becomes \((x, z) \to (z \oplus s,\ x)\).</li>
 <li><strong>Undo once at the end</strong>, on the output qubit: apply \(X\) if \(x = 1\), then \(Z\) if \(z = 1\).</li>
 </ul>
 <div class="math">\(J\big((-1)^x\theta\big)\,X^xZ^z \propto Z^xX^z\,J(\theta)\)</div>
-<p>Here \(\propto\) means equal up to a global phase, and \(\oplus\) is addition mod 2 (XOR). The \((-1)^x\) on the left is rule 1 at work: since \(P(-\theta)X \propto X P(\theta)\), an \(X\) only passes through \(J\) once the angle is flipped. A \(Z\) commutes with \(P\), so it does not flip <em>this</em> qubit's angle. But \(J\) turns it into an \(X\) on the next qubit (rule 2 sends \(z\) into the next \(x\)), and that \(X\) flips the next angle. A \(Z\) delays a flip by one step; it does not avoid it. Lesson "A traced run" shows one: the \(Z\) on qubit 2 causes the flip on qubit 3.</p>
+<p>Here \(\propto\) means equal up to a global phase, and \(\oplus\) is addition mod 2 (XOR). The \((-1)^x\) on the left is rule 1 (previous lesson). A \(Z\) commutes with \(P\), so it does not flip <em>this</em> qubit's angle. But \(J\) turns it into an \(X\) on the next qubit (rule 2 sends \(z\) into the next \(x\)), and that \(X\) flips the next angle. A \(Z\) delays a flip by one step; it does not avoid it. Lesson "A traced run" shows one: the \(Z\) on qubit 2 causes the flip on qubit 3.</p>
 <p class="cite">Checked in notebook 2 (all four branches of the 3-qubit wire) and notebook 3 (all 16 of the 5-qubit wire). Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
 <p class="code">In the code: <code>mbqc.PauliFrame</code>, with <code>angle</code>, <code>teleport</code> and <code>undo</code>.</p>
 <div class="check"><p class="q">A qubit carries frame \((x, z) = (0, 1)\) and is measured with outcome \(s = 1\). What frame does the next qubit get, and must its angle be flipped?</p><button type="button">Show answer</button><p class="a" hidden>\((z \oplus s, x) = (1 \oplus 1, 0) = (0, 0)\): no byproduct, so its angle is not flipped.</p></div>
 </article>
 
 <article data-unit="3" data-title="Four angles make any rotation">
-<p>Which gates can four measurements make? Part 2 gave one gate, \(J(\theta) = H P(-\theta)\), per measurement. Use two facts: \(P(\phi)\) equals \(R_z(\phi)\) up to a global phase, and conjugating by \(H\) turns a \(Z\) rotation into an \(X\) rotation, \(H P(\phi) H \propto R_x(\phi)\). Then, with \(P_k\) short for \(P(-\theta_k)\) and the first angle set to 0,</p>
+<p>Which gates can four measurements make? Each one applies \(J(\theta) = H P(-\theta)\). Use two facts: \(P(\phi)\) equals \(R_z(\phi)\) up to a global phase, and conjugating by \(H\) turns a \(Z\) rotation into an \(X\) rotation, \(H P(\phi) H \propto R_x(\phi)\). Then, with \(P_k\) short for \(P(-\theta_k)\) and the first angle set to 0,</p>
 <div class="math">\(J(\theta_3)J(\theta_2)J(\theta_1)J(0) = HP_3\,HP_2\,HP_1\,H\)</div>
 <div class="math">\(= (HP_3H)\,P_2\,(HP_1H)\)</div>
 <div class="math">\(\propto R_x(-\theta_3)\,R_z(-\theta_2)\,R_x(-\theta_1)\)</div>
 <p>The rotations are \(R_x(\phi) = \cos(\phi/2)\,I - i\sin(\phi/2)\,X\), and the same with \(Z\) for \(R_z\). The first measurement, at angle 0, just supplies the Hadamard that opens the sandwich.</p>
-<p>Every single-qubit unitary is, up to a phase, an \(X\)–\(Z\)–\(X\) rotation. So a 5-qubit wire (input, four measurements, output) does any single-qubit gate. This is the Raussendorf–Browne–Briegel construction.</p>
+<p>Every single-qubit unitary is such an \(X\)–\(Z\)–\(X\) rotation (lesson "A wire of measurements"), so the 5-qubit wire does any single-qubit gate: the Raussendorf–Browne–Briegel construction.</p>
 <p class="cite">Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
 <div class="check"><p class="q">Which angles give the identity gate (up to phase)?</p><button type="button">Show answer</button><p class="a" hidden>All four angles 0: \(J(0)^4 = H^4 = I\).</p></div>
 </article>
 
 <article data-unit="3" data-title="Euler angles to measurement angles">
-<p>Which angles run a given gate \(U\)? Write \(U\) through its Euler angles (lesson "A wire of measurements"), three rotations about fixed axes:</p>
+<p>Which angles run a given gate \(U\)? Write \(U\) through its Euler angles (lesson "A wire of measurements"):</p>
 <div class="math">\(U \propto R_x(c)\,R_z(b)\,R_x(a)\)</div>
 <p>(\(a\) acts first). Match this with the last lesson's \(R_x(-\theta_3)R_z(-\theta_2)R_x(-\theta_1)\) and read off the four measurement angles along the wire:</p>
 <div class="math">\((\theta_0, \theta_1, \theta_2, \theta_3) = (0,\ -a,\ -b,\ -c)\)</div>
@@ -378,7 +360,6 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <article data-unit="3" data-title="A traced run">
 <p>What does the Pauli frame do in a real run? Here is one run of the 5-qubit wire for the \(U\) of the last lesson, outcome by outcome. Step through it: each frame measures one qubit, shows the angle used against the angle wanted, and writes the new byproduct \(X^xZ^z\) under the next qubit.</p>
 <div class="stepper"></div>
-<p>Two of the four angles were flipped, because the qubit carried an \(X\). Qubit 2 carried only a \(Z\), so its angle stayed; measuring it turned that \(Z\) into the \(X\) on qubit 3, which flipped qubit 3's angle. The output qubit ended with \(X^1Z^1\), undone once at the end.</p>
 <div class="data"><b>Your data</b>Outcomes \(s = 1, 0, 0, 1\). Qubit 1 measured at \(+3.100\) (wanted \(-3.100\)), qubit 3 at \(-3.130\) (wanted \(+3.130\)). After the undo, fidelity with \(U|\psi\rangle\) is 1.0. Notebook 3.</div>
 <div class="check"><p class="q">Qubit 1 had frame \((1, 0)\) and outcome \(s = 0\). Use the update rule to check the frame on qubit 2.</p><button type="button">Show answer</button><p class="a" hidden>\((z \oplus s, x) = (0 \oplus 0, 1) = (0, 1)\), that is \(X^0Z^1\), as shown.</p></div>
 </article>
@@ -387,7 +368,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <p>Does the frame work for every outcome, or was that run lucky? Four outcomes give \(2^4 = 16\) branches, and the code can force each one in turn.</p>
 <div class="data"><b>Your data</b>With adaptation: the minimum fidelity with \(U|\psi\rangle\) over all 16 branches is 1.0. Without it: 1.0 (to three digits) in half the branches, but 0.466, 0.466, 0.473, 0.473, 0.456, 0.456, 0.45, 0.45 in the eight branches with \(s_1 = 1\). Notebook 3.</div>
 <p>Why only those eight? The angle that matters is \(\theta_2 = -b = -0.9017\). An outcome \(s_1 = 1\) puts an \(X\) on qubit 2, and the fixed angle then applies \(R_z(-b)\) instead of \(R_z(b)\): the wrong gate.</p>
-<p>The other flips barely matter for this \(U\), because \(a\) and \(c\) are close to \(\pm\pi\), and \(R_x(\pi)\) and \(R_x(-\pi)\) differ only by a global phase. That is why fixed angles survive in 8 branches here but in only 2 in lesson "A wire of measurements": for a generic \(U\) every flip matters, and only the 2 branches with no flipped angle come out right. The last outcome \(s_3\) never changes a later angle at all: it only enters the final correction.</p>
+<p>The other flips barely matter for this \(U\), because \(a\) and \(c\) are close to \(\pm\pi\), and \(R_x(\pi)\) and \(R_x(-\pi)\) differ only by a global phase. That is why fixed angles survive in 8 branches here but in only 2 for the generic \(U\) of lesson "A wire of measurements". The last outcome \(s_3\) never changes a later angle at all: it only enters the final correction.</p>
 <p>PennyLane does adaptive measurement directly: <code>pennylane.ftqc.cond_measure</code> picks the measurement basis from an earlier outcome.</p>
 <div class="data"><b>Your data</b>The 3-qubit wire of "Byproducts flip the next angle" (\(\theta_0 = 0.4\), \(\theta_1 = 1.3\)) with <code>cond_measure</code>: Bloch vector \((-0.9202, 0.3866, -0.0611)\) in PennyLane, the same as NumPy. Notebook 3.</div>
 <div class="check"><p class="q">For a gate with \(a = c = 0.5\), would more than eight non-adaptive branches fail?</p><button type="button">Show answer</button><p class="a" hidden>Yes. Now flipping \(\theta_1\) or \(\theta_3\) gives a genuinely different \(R_x\), so branches that put an \(X\) on qubit 1 or qubit 3 fail too.</p></div>
@@ -402,7 +383,6 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <p>These are the X and Y measurements, the <em>Pauli measurements</em>. The test is</p>
 <div class="math">\(\sin(2\theta) = 0\)</div>
 <p><strong>Pauli measurements never wait for earlier outcomes</strong>, so they can all be done at once, at the start. Only the other angles force a time order. Part 5 shows how far this goes.</p>
-<p>One more limit: a 1D cluster only ever holds one logical qubit. To make qubits interact you need a second dimension.</p>
 <p class="code">In the code: <code>mbqc.is_pauli_angle(theta)</code>.</p>
 <div class="check"><p class="q">The wire for a Hadamard gate, \(U = H\), uses which angles, and do any of them wait?</p><button type="button">Show answer</button><p class="a" hidden>One valid choice is \((0, -\pi/2, -\pi/2, -\pi/2)\), from \(H \propto R_x(\pi/2)R_z(\pi/2)R_x(\pi/2)\). All four are Pauli angles, so none waits: a flipped sign is handled by relabelling that outcome afterwards.</p></div>
 </article>
@@ -412,7 +392,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <p>All the CZs were applied when the resource state was made, before any measurement. But a CZ commutes with every measurement on other qubits. So the CZ on an edge can be moved later, to the moment the two logical qubits sit at its two ends, and there it acts between them. <strong>An edge between the qubits holding two logical qubits is a CZ gate, already applied, for free.</strong></p>
 <p>A CZ plus single-qubit gates gives a CNOT. Sandwich the CZ between Hadamards on the target:</p>
 <div class="math">\(\mathrm{CNOT} = (I\otimes H)\,\mathrm{CZ}\,(I\otimes H)\)</div>
-<p>and a Hadamard is one wire step at angle 0, \(H = J(0)\) (lesson "One measurement is a gate"). So the target walks two steps along its wire, and the CZ edge sits between them. The control does not move at all.</p>
+<p>and a Hadamard is one wire step at angle 0, \(H = J(0)\) (lesson "One measurement is a gate"). So the target walks two steps along its wire, and the CZ edge sits between them.</p>
 <div class="check"><p class="q">Why does \(H\,Z\,H = X\) turn a CZ into a CNOT?</p><button type="button">Show answer</button><p class="a" hidden>CZ applies \(Z\) to the target when the control is 1. Conjugating the target by \(H\) turns that \(Z\) into an \(X\): a NOT on the target when the control is 1.</p></div>
 </article>
 
@@ -423,7 +403,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 <li>The two top corners are measured in Z, which deletes them (lesson "Z measurements delete vertices"). Each leaves a \(Z^s\) on its neighbours.</li>
 <li>The control \(c\) is the top-middle qubit. Its input qubit is its output qubit.</li>
 <li>The target enters on \(t_0\) and walks \(t_0 \to t_1 \to t_2\) with two X measurements, two Hadamards.</li>
-<li>Between the two Hadamards, the logical target sits on \(t_1\), which shares an edge with \(c\): that edge is the CZ. It was made at the start, but it commutes with the measurement of \(t_0\), so it acts as if applied just after it.</li>
+<li>Between the two Hadamards, the logical target sits on \(t_1\), which shares an edge with \(c\): that edge is the CZ.</li>
 </ul>
 <p>What is left after carving is 4 qubits: \(c\), \(t_0\), \(t_1\), \(t_2\). This is the standard CNOT pattern of the measurement calculus. The original one-way-computer CNOT used a bigger 15-qubit patch.</p>
 <p class="cite">Danos, Kashefi and Panangaden, <a href="https://arxiv.org/abs/0704.1263">arXiv:0704.1263</a>; <a href="https://doi.org/10.1145/1219092.1219096">J. ACM 54, 8 (2007)</a>. Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
@@ -431,20 +411,20 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 </article>
 
 <article data-unit="4" data-title="Byproducts through a CZ">
-<p>What happens to an \(X\) byproduct that meets a CZ? The target reaches the CZ edge carrying a byproduct from its first step. Push it through:</p>
+<p>What happens to an \(X\) byproduct that meets a CZ? The target reaches the CZ edge carrying a byproduct from its first step. Push it through with the identity of lesson "Stabilizers":</p>
 <div class="math">\(\mathrm{CZ}\,(X\otimes I) = (X\otimes Z)\,\mathrm{CZ}\)</div>
 <p><strong>An \(X\) on one side of a CZ adds a \(Z\) on the other side.</strong> A \(Z\) commutes with CZ and passes straight through.</p>
 <p>In the Pauli frame this is two XORs, one for each direction: \(z_c \mathrel{\oplus}= x_{t}\) and \(z_t \mathrel{\oplus}= x_c\). So an \(X\) byproduct on the target, from the first Hadamard step, turns up as a \(Z\) byproduct on the control.</p>
-<p>Why may a byproduct made by measuring \(t_0\) be pushed through a CZ made before it? Because that CZ, on \(c\) and \(t_1\), commutes with the measurement of \(t_0\): applying it before or after gives the same state, so we may treat it as acting after. The whole run is: make the 2 × 3 cluster (all 7 CZs at once); Z-measure the two corners; X-measure \(t_0\) (frame moves to \(t_1\)); apply the frame rule for the \(c\)–\(t_1\) edge; X-measure \(t_1\) (frame moves to \(t_2\)); undo the frames on \(c\) and \(t_2\).</p>
+<p>The byproduct comes from measuring \(t_0\), after the CZ was made, but that CZ commutes with the measurement (lesson "Edges between wires are free CZs"), so it may be treated as acting after. The whole run is: make the 2 × 3 cluster (all 7 CZs at once); Z-measure the two corners; X-measure \(t_0\) (frame moves to \(t_1\)); apply the frame rule for the \(c\)–\(t_1\) edge; X-measure \(t_1\) (frame moves to \(t_2\)); undo the frames on \(c\) and \(t_2\).</p>
 <p class="cite">Checked in notebook 4 (all 16 branches, next lesson). Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
 <p class="code">In the code: <code>PauliFrame.cz(c, t1)</code>, inside <code>mbqc.run_cnot_patch</code>.</p>
 <div class="check"><p class="q">The target carries \(X^1Z^0\) when the edge acts, the control carries nothing. What are the two frames after the CZ?</p><button type="button">Show answer</button><p class="a" hidden>Target still \(X^1Z^0\) (the control has no \(X\) to give it a \(Z\)). Control gets \(z_c = 0 \oplus 1 = 1\), so \(X^0Z^1\).</p></div>
 </article>
 
 <article data-unit="4" data-title="Checking the CNOT">
-<p>Does the patch really apply a CNOT, whatever the outcomes? Four measured qubits give 16 outcome branches. Forcing each one in turn tests that the bookkeeping is right everywhere, not just on a lucky run.</p>
+<p>Does the patch really apply a CNOT, whatever the outcomes? Four measured qubits give 16 outcome branches, and each one is forced in turn.</p>
 <div class="data"><b>Your data</b>A random 2-qubit input: the minimum fidelity with \(\mathrm{CNOT}|\psi\rangle\) over all 16 branches is 1.0. Input \(|+\rangle|0\rangle\): output \((0.7071, 0, 0, 0.7071)\), the Bell state \((|00\rangle + |11\rangle)/\sqrt2\), with 1.0 bit of entanglement. Notebook 4.</div>
-<p>The second check matters most. The two logical qubits went in as a product state and came out with 1 bit of entanglement. Single-qubit measurements on the patch created entanglement between logical qubits, drawn from the entanglement already stored in the cluster.</p>
+<p>The second check matters most: single-qubit measurements turned a product input into 1 bit of entanglement between the logical qubits, drawn from the entanglement stored in the cluster.</p>
 <p>Both measurements in this pattern are at angle 0, so the angles never need flipping. The byproducts still need tracking, through the CZ, for the final correction.</p>
 <div class="check"><p class="q">What would the patch output for the input \(|1\rangle|0\rangle\)?</p><button type="button">Show answer</button><p class="a" hidden>\(|1\rangle|1\rangle\): the control is 1, so the target is flipped.</p></div>
 </article>
@@ -479,15 +459,15 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 </article>
 
 <article data-unit="5" data-title="Clifford circuits in one round">
-<p>Which measurements have to wait? Two words first. A <em>Clifford</em> gate maps Pauli operators to Pauli operators; \(H\), \(S = P(\pi/2)\) and CNOT generate all of them. The <em>depth</em> of a circuit is its number of gate layers.</p>
+<p>How many rounds of measurements does a whole circuit need? Two words first. A <em>Clifford</em> gate maps Pauli operators to Pauli operators; \(H\), \(S = P(\pi/2)\) and CNOT generate all of them. The <em>depth</em> of a circuit is its number of gate layers.</p>
 <p>To see what waits for what before any outcome is known, run the Pauli frame with <em>sets of outcome labels</em> instead of bits. Each frame bit becomes the set of outcomes whose XOR it is, and \(\oplus\) of two sets keeps the labels that appear in exactly one. On the 3-qubit wire of "Byproducts flip the next angle", starting from no byproduct, rule 2, \((x, z) \to (z \oplus s, x)\), gives</p>
 <div class="math">\((\varnothing, \varnothing) \xrightarrow{\ s_0\ } (\{s_0\}, \varnothing) \xrightarrow{\ s_1\ } (\{s_1\}, \{s_0\})\)</div>
 <p>for the frames on qubits 1 and 2. A measurement must wait for every outcome in its \(X\) set, unless its angle is a Pauli angle (lesson "Which angles must wait").</p>
 <p>A <em>round</em> is a set of measurements done at the same time. A measurement's round is one more than the latest round it waits for. Here qubit 0 waits for nothing: round 1. Qubit 1's \(X\) set is \(\{s_0\}\): at \(\theta_1 = 1.3\) it must wait for \(s_0\), round 2; at \(\theta_1 = \pi/2\), a Pauli angle, it waits for nothing, and both qubits go in round 1.</p>
 <p>Now compile the Clifford generators with lesson "J and CZ are universal": \(H = J(0)\), \(S \propto J(0)\,J(-\pi/2)\), and CNOT is \(J(0)\), CZ, \(J(0)\). Every angle is 0 or \(-\pi/2\), a Pauli angle.</p>
 <div class="data"><b>Your data</b>4-qubit layered circuits. Depth 1, 2, 4, 8, 16 with Clifford angles: 1 round every time. With generic angles: 1, 2, 4, 8, 16 rounds. Notebook 5.</div>
-<p><strong>Any Clifford circuit (H, S, CNOT), however deep, runs in one round of simultaneous measurements.</strong> Its angles are all multiples of \(\pi/2\), so nothing ever waits; outcomes only enter the final correction. Only non-Clifford angles create a time order.</p>
-<p>This suits hardware where measuring is fast but entangling gates are hard, like photons: the Clifford part of an algorithm costs one round, whatever its depth.</p>
+<p><strong>Any Clifford circuit (H, S, CNOT), however deep, runs in one round of simultaneous measurements.</strong> Outcomes only enter the final correction. Only non-Clifford angles create a time order.</p>
+<p>On photonic hardware, the Clifford part of an algorithm therefore costs one round, whatever its depth.</p>
 <p class="cite">Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>; <a href="https://doi.org/10.1103/PhysRevA.68.022312">PRA 68, 022312 (2003)</a>.</p>
 <p class="code">In the code: <code>mbqc.measurement_depth(pattern)</code>.</p>
 <div class="check"><p class="q">A circuit is 100 Clifford layers followed by one \(R_z(0.3)\). How many rounds?</p><button type="button">Show answer</button><p class="a" hidden>At most 2. All the Clifford measurements go in round 1; the one non-Clifford measurement waits for the outcomes in its \(X\) byproduct, so it goes in round 2 (round 1 if that byproduct happens to be empty).</p></div>
@@ -502,7 +482,7 @@ pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: v
 </article>
 
 <article data-unit="6" data-title="Why photons">
-<p>How does photonic hardware build an MBQC machine? Lesson 1 gave the reason photons suit MBQC: entangling two flying photons is hard, but making small entangled states and measuring them is natural. Two designs build on it, and each experiment below tests one idea from them:</p>
+<p>How does photonic hardware build an MBQC machine? Lesson 1 gave the reason photons suit MBQC. Two designs build on it, and each experiment below tests one idea from them:</p>
 <ul>
 <li><strong>Xanadu's blueprint</strong> stores each qubit in a mode of light, as a <em>GKP qubit</em> whose small errors can be corrected, and weaves the modes into one large 3D cluster state. Its key hardware figure is tested in "GKP qubits and squeezing".</li>
 <li><strong>PsiQuantum's fusion-based design</strong> makes many small resource states and joins them with two-photon measurements that succeed only part of the time. Tested in "Fusion".</li>
