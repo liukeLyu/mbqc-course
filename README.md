@@ -6,7 +6,7 @@ A short course on **measurement-based quantum computation (MBQC)**, taught throu
 Six notebooks, each starting from the intuition and then checking it numerically, plus a short lesson 0 for newcomers. PennyLane appears only where it
 shows something extra: mid-circuit measurements with feedforward (`pennylane.ftqc`).
 
-On a phone? The [pocket course](https://liukelyu.github.io/mbqc-course/docs/pocket-course.html) covers the theory of these notebooks in 20 two-minute lessons, with the numbers they produce, and ends with a short part on how photonic hardware implements MBQC.
+On a phone? The [pocket course](https://liukelyu.github.io/mbqc-course/docs/pocket-course.html) covers the theory of these notebooks in 20 two-minute lessons, with the numbers they produce, and ends with a short part on how photonic hardware implements MBQC. A companion, the [instruments pocket course](https://liukelyu.github.io/mbqc-course/docs/instruments-pocket-course.html), treats measurement, feedforward, teleportation, error correction and MBQC as maps on one object that keeps every outcome branch: the classical–quantum state.
 
 | # | Notebook | What you learn |
 |---|----------|----------------|
