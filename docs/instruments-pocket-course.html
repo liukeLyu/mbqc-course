@@ -1,0 +1,614 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Instruments Pocket Course</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one narrow reading column; a home list of lessons, and one lesson at a time with a sticky bar. */
+:root {
+  --bg: #f3f6f8;
+  --paper: #ffffff;
+  --ink: #15232d;
+  --muted: #5a6b76;
+  --line: #d6e0e6;
+  --accent: #0d6f7d;
+  --accent-soft: #e0f0f2;
+  --done: #2f7a3e;
+  --data: #7a4a0d;
+  --data-soft: #fbf1e2;
+  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f171c; --paper: #16222a; --ink: #e3ecf0; --muted: #93a6b1; --line: #2a3a44;
+    --accent: #5cc3cf; --accent-soft: #173a40; --done: #79c788; --data: #e8b56a; --data-soft: #2e2416;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f171c; --paper: #16222a; --ink: #e3ecf0; --muted: #93a6b1; --line: #2a3a44;
+  --accent: #5cc3cf; --accent-soft: #173a40; --done: #79c788; --data: #e8b56a; --data-soft: #2e2416;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 18px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 640px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.2; margin: 0; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--accent-soft); padding: 0.05em 0.3em; border-radius: 4px; overflow-wrap: anywhere; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Home */
+.hero { padding-block: 28px 8px; display: grid; gap: 10px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font-size: 34px; }
+.hero p { margin: 0; color: var(--muted); }
+.progress { display: grid; gap: 6px; margin-top: 8px; }
+.bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--accent); width: 0; transition: width 0.3s; }
+.progress small { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.continue { margin-top: 10px; background: var(--accent); color: var(--paper); border: 0; border-radius: 12px; padding: 14px 18px; text-align: left; font-family: var(--display); font-weight: 700; font-size: 17px; }
+.continue span { display: block; font-family: var(--body); font-weight: 400; font-size: 15px; opacity: 0.9; }
+.unit { margin-top: 28px; display: grid; gap: 4px; }
+.unit h2 { font-size: 15px; font-family: var(--mono); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.unit p.blurb { margin: 4px 0 6px; font-size: 15px; color: var(--muted); }
+.row { display: grid; grid-template-columns: 2.2em 1fr auto; align-items: center; gap: 10px; width: 100%; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 12px 2px; text-align: left; color: var(--ink); }
+.row .n { font-family: var(--mono); font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.row .t { font-family: var(--display); font-weight: 500; font-size: 17px; line-height: 1.3; min-width: 0; }
+.row .mark { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 13px; color: var(--paper); }
+.row.is-done .mark { background: var(--done); border-color: var(--done); }
+.row.is-done .mark::after { content: "✓"; }
+.foot { margin-top: 32px; font-size: 15px; color: var(--muted); }
+.linkbtn { background: none; border: 0; color: var(--accent); text-decoration: underline; padding: 0; font-size: 15px; }
+
+/* Lesson view */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; border-bottom: 1px solid var(--line); }
+.topbar button { background: none; border: 0; color: var(--accent); font-family: var(--display); font-weight: 500; font-size: 16px; padding: 6px 0; }
+.topbar .pos { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lesson { padding-block: 18px 8px; display: grid; gap: 14px; }
+.lesson .unitname { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.lesson h2 { font-size: 27px; }
+.lesson p { margin: 0; }
+.lesson > *, .lesson li { min-width: 0; }
+.lesson ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.math { overflow-x: auto; overflow-y: hidden; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; text-align: center; }
+.data { background: var(--data-soft); border-radius: 10px; padding: 12px 14px; font-size: 16px; }
+.data b { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--data); display: block; margin-bottom: 2px; }
+.code { font-size: 15px; color: var(--muted); }
+pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; overflow-x: auto; margin: 0; }
+.check { border: 2px solid var(--accent-soft); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.check .q { font-weight: 600; }
+.check .q::before { content: "Quick check  "; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); display: block; font-weight: 400; }
+.check button { justify-self: start; background: var(--accent-soft); color: var(--accent); border: 0; border-radius: 8px; padding: 8px 14px; font-family: var(--display); font-weight: 500; font-size: 15px; }
+.check .a { border-top: 1px dashed var(--line); padding-top: 8px; }
+.cite { font-size: 15px; color: var(--muted); }
+.nav { display: flex; gap: 10px; margin-top: 10px; }
+.nav button { flex: 1; border-radius: 12px; padding: 14px; font-family: var(--display); font-weight: 700; font-size: 16px; border: 2px solid var(--accent); }
+.nav .prev { background: none; color: var(--accent); flex: 0 0 auto; padding-inline: 18px; }
+.nav .next { background: var(--accent); color: var(--paper); }
+.tn { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; }
+.tn svg { max-width: 100%; height: auto; display: inline-block; }
+.plot { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; }
+.plot svg { max-width: 100%; height: auto; }
+.lesson table { border-collapse: collapse; font-size: 14px; width: 100%; font-variant-numeric: tabular-nums; }
+.lesson th, .lesson td { border-bottom: 1px solid var(--line); padding: 5px 4px; text-align: left; }
+.lesson th { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--muted); }
+.plot .grid { stroke: var(--line); stroke-width: 1; }
+.plot .axis { stroke: var(--muted); stroke-width: 1; }
+.plot .tick { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.plot .lab { font-family: var(--mono); font-size: 12px; fill: var(--ink); }
+.plot .fit { stroke: var(--data); stroke-width: 2; stroke-linecap: round; }
+.plot .pt { fill: var(--accent); stroke: var(--paper); stroke-width: 1; }
+.plot .cap { font-size: 13px; color: var(--muted); margin: 4px 6px 0; text-align: left; }
+.tn-line { stroke: var(--ink); stroke-width: 1.6; fill: none; stroke-linecap: round; }
+.tn-line.thick { stroke-width: 3.6; }
+.tn-node > * { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; }
+.tn-node.soft > * { fill: var(--accent-soft); }
+.tn-node.accent > * { fill: var(--accent); stroke: var(--accent); }
+.tn-label { font-family: var(--mono); font-size: 12px; fill: var(--ink); }
+.tn-label.tight { font-size: 9.5px; }
+.tn-label.on-accent { fill: var(--paper); font-weight: 600; }
+.tn-idx { font-family: var(--body); font-style: italic; font-size: 12px; fill: var(--muted); }
+.tn-text { font-family: var(--body); font-size: 20px; fill: var(--ink); }
+.tn-text.small { font-size: 12.5px; fill: var(--muted); }
+.tn-box { fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 4 4; }
+.tn-boxlabel { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.tn-box.new { stroke: var(--accent); stroke-width: 2; stroke-dasharray: none; }
+.tn-boxlabel.new { fill: var(--accent); font-weight: 700; }
+.tn-node.centre > * { fill: var(--data-soft); stroke: var(--data); }
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+</style>
+
+<div class="wrap">
+
+<section id="home">
+  <div class="hero">
+    <div class="eyebrow">Companion to mbqc-course</div>
+    <h1>Instruments Pocket Course</h1>
+    <p><span id="nLessons">Twenty</span> short lessons, about two minutes each, on one object that keeps every measurement branch and its probability: the classical–quantum state, and the instruments that make it. Measurement, feedforward, teleportation, error correction and MBQC all become maps on it. Each lesson ends with a quick check you can do in your head. The amber boxes give numbers checked by <code>instruments_checks.py</code>, next to this page.</p>
+    <div class="progress">
+      <div class="bar"><span id="bar"></span></div>
+      <small id="count">0 lessons done</small>
+    </div>
+    <button class="continue" id="continue" type="button">Start with lesson 1<span>Keep every branch</span></button>
+  </div>
+  <div id="units"></div>
+  <p class="foot">Your progress is saved in this browser only. <button class="linkbtn" id="reset" type="button">Clear progress</button><span id="resetConfirm" hidden> Clear all ticks? <button class="linkbtn" id="resetYes" type="button">Yes, clear</button> · <button class="linkbtn" id="resetNo" type="button">Keep</button></span></p>
+</section>
+
+<section id="reader" hidden>
+  <div class="topbar">
+    <button type="button" id="back">← All lessons</button>
+    <span class="pos" id="pos"></span>
+  </div>
+  <div id="stage"></div>
+  <div class="nav">
+    <button class="prev" type="button" id="prev">←</button>
+    <button class="next" type="button" id="next">Got it, next →</button>
+  </div>
+</section>
+
+<!-- Lessons. data-unit groups them; each needs data-title. -->
+<div id="lessons" hidden>
+
+<article data-unit="0" data-title="Keep every branch">
+<p>How do you write down a measurement's outcome, its probability and the state it leaves behind as <em>one</em> object?</p>
+<p>Take two qubits A and B in</p>
+<div class="math">\(\begin{aligned}|\psi\rangle = {}&\sqrt{\tfrac13}\,|0\rangle_A|0\rangle_B \\ &+ \sqrt{\tfrac23}\,|1\rangle_A|{+}\rangle_B\end{aligned}\)</div>
+<p>and measure A in the Z basis. Outcome 0 comes with probability 1/3 and leaves B in \(|0\rangle\); outcome 1 comes with probability 2/3 and leaves B in \(|{+}\rangle\). Write the outcome into a classical <em>record</em> R, and keep each probability inside its branch instead of dividing it out:</p>
+<div class="math">\(\begin{aligned}\omega_{RB} = {}&|0\rangle\langle 0|_R \otimes \tfrac13 |0\rangle\langle 0| \\ &+ |1\rangle\langle 1|_R \otimes \tfrac23 |{+}\rangle\langle{+}|\end{aligned}\)</div>
+<p>As a matrix, record first, it is block diagonal: one block per outcome.</p>
+<div class="math">\(\omega_{RB} = \begin{pmatrix} \tfrac13 & 0 & & \\ 0 & 0 & & \\ & & \tfrac13 & \tfrac13 \\ & & \tfrac13 & \tfrac13 \end{pmatrix}\)</div>
+<p>The recipe for any state and any projective measurement \(\{P_k\}\) on A:</p>
+<div class="math">\(\begin{gathered}\omega = \sum_k |k\rangle\langle k|_R \otimes \rho_k \\ \rho_k = \mathrm{Tr}_A\!\left[(P_k\otimes 1)\,\rho_{AB}\right] \\ p_k = \mathrm{Tr}\,\rho_k\end{gathered}\)</div>
+<p>The blocks \(\rho_k\) are unnormalized on purpose: the trace of each block is the probability of that branch. So \(\omega\) is an ordinary density matrix (positive, trace 1) that holds every branch and its odds at once. It is called a <em>classical–quantum state</em>, or cq state (Wilde, <a href="https://arxiv.org/abs/1106.1445">arXiv:1106.1445</a>). Every protocol in this course is a sequence of maps that take one cq state to another.</p>
+<div class="data"><b>Checked</b>The two blocks are \(\tfrac13|0\rangle\langle0|\) and \(\tfrac23|{+}\rangle\langle{+}|\); \(\omega\) has trace 1 and no negative eigenvalue. <code>instruments_checks.py</code>, L1–2.</div>
+<div class="check"><p class="q">Measure A of \(|{+}\rangle_A|0\rangle_B\) in Z. What is \(\omega_{RB}\)?</p><button type="button">Show answer</button><p class="a" hidden>\(\tfrac12|0\rangle\langle0|\otimes|0\rangle\langle0| + \tfrac12|1\rangle\langle1|\otimes|0\rangle\langle0| = \tfrac{1}{2}1_R \otimes |0\rangle\langle 0|\). Both blocks hold the same state, so the record is uncorrelated with B: a product state.</p></div>
+</article>
+
+<article data-unit="1" data-title="Reading a cq state">
+<p>What can you get out of \(\omega\) once you have it?</p>
+<p>Three operations, each shown on the example of the last lesson, \(\omega = |0\rangle\langle0|\otimes\tfrac13|0\rangle\langle0| + |1\rangle\langle1|\otimes\tfrac23|{+}\rangle\langle{+}|\):</p>
+<ul>
+<li><strong>Probability of an outcome:</strong> the trace of its block. \(p_1 = \mathrm{Tr}\,\rho_1 = 2/3\).</li>
+<li><strong>Forget the outcome:</strong> trace out the record, which adds up the blocks.
+<div class="math">\(\mathrm{Tr}_R\,\omega = \rho_0 + \rho_1 = \begin{pmatrix} 2/3 & 1/3 \\ 1/3 & 1/3\end{pmatrix}\)</div></li>
+<li><strong>Postselect:</strong> keep one block and renormalize. Keeping outcome 1 gives \(\rho_1/p_1 = |{+}\rangle\langle{+}|\), and works in 2/3 of the runs.</li>
+</ul>
+<p>The matrix you get by forgetting is exactly \(\mathrm{Tr}_A|\psi\rangle\langle\psi|\), the state of B if A had never been measured. It must be: if measuring A changed B's state, whoever holds A could signal to B by choosing whether to measure.</p>
+<p>Forgetting is a partial trace, a channel like any other. Postselection is the one operation that is not: it throws away the other blocks, so it is not trace preserving, and you pay for it by repeating the experiment \(1/p_k\) times on average.</p>
+<div class="data"><b>Checked</b>\(\mathrm{Tr}_R\,\omega = \mathrm{Tr}_A|\psi\rangle\langle\psi|\) and \(\rho_1/p_1 = |{+}\rangle\langle{+}|\). <code>instruments_checks.py</code>, L1–2.</div>
+<div class="check"><p class="q">Which of the three operations would you use to compute the average of \(\langle Z_B\rangle\) over all runs, and what is it here?</p><button type="button">Show answer</button><p class="a" hidden>Forget the outcome: \(\mathrm{Tr}(Z\,\mathrm{Tr}_R\,\omega) = 2/3 - 1/3 = 1/3\). Averages of observables only need the summed blocks.</p></div>
+</article>
+
+<article data-unit="1" data-title="The label must be written down">
+<p>Is a list of branches really more than its average?</p>
+<p>Two sources each emit one qubit per run. Source Z sends \(|0\rangle\) or \(|1\rangle\) with probability 1/2 each; source X sends \(|{+}\rangle\) or \(|{-}\rangle\). Both average to \(1/2\): no measurement on the qubit alone can tell which source you have. Every mixed state has infinitely many such decompositions into ensembles, and they are all related by a unitary mixing the vectors \(\sqrt{p_k}|\psi_k\rangle\); here that unitary is the Hadamard (Hughston, Jozsa and Wootters, <a href="https://doi.org/10.1016/0375-9601(93)90880-9">Phys. Lett. A 183, 14 (1993)</a>).</p>
+<p>Now let each source also write down which state it sent:</p>
+<div class="math">\(\begin{aligned}\omega_Z &= \tfrac12|0\rangle\langle0|\otimes|0\rangle\langle0| \\ &\;+ \tfrac12|1\rangle\langle1|\otimes|1\rangle\langle1| \\ \omega_X &= \tfrac12|0\rangle\langle0|\otimes|{+}\rangle\langle{+}| \\ &\;+ \tfrac12|1\rangle\langle1|\otimes|{-}\rangle\langle{-}|\end{aligned}\)</div>
+<p>These are different states. Their trace distance is \(\tfrac12\|\omega_Z-\omega_X\|_1 = 1/\sqrt2\), so someone holding record and qubit can guess the source correctly 85% of the time, \(\tfrac12(1+1/\sqrt2)\) (Helstrom's bound, see Wilde <a href="https://arxiv.org/abs/1106.1445">arXiv:1106.1445</a>). Without the record they can only do 50%.</p>
+<p>So the branch picture is physical exactly when the branch label is stored somewhere. The cq state makes that storage explicit: the record is a system in the density matrix, not a story told beside it.</p>
+<div class="data"><b>Checked</b>Both cq states reduce to \(1/2\); their trace distance is 0.7071; the Hadamard maps one ensemble's vectors to the other's. <code>instruments_checks.py</code>, L3.</div>
+<div class="check"><p class="q">Can a pure state \(|\phi\rangle\langle\phi|\) be written as a mixture of different pure states?</p><button type="button">Show answer</button><p class="a" hidden>No. A pure state has rank 1, so every vector in a decomposition must be proportional to \(|\phi\rangle\). Only mixed states have many ensembles.</p></div>
+</article>
+
+<article data-unit="1" data-title="A record is a diagonal qubit">
+<p>Why can a record be read, copied and passed around freely, when a qubit cannot?</p>
+<p>The record R is an ordinary quantum system whose state is always diagonal in one fixed basis. Three facts follow, each checked on the example \(\omega\) of the first lesson:</p>
+<ul>
+<li><strong>Reading it disturbs nothing.</strong> Measuring R in its own basis maps \(\omega \mapsto \sum_k (|k\rangle\langle k|\otimes 1)\,\omega\,(|k\rangle\langle k|\otimes 1) = \omega\).</li>
+<li><strong>Copying works.</strong> A CNOT from R onto a fresh bit in \(|0\rangle\) gives \(\sum_k |kk\rangle\langle kk|\otimes\rho_k\): two people now hold the same outcome. The same CNOT on a qubit in \(|{+}\rangle\) makes a Bell pair instead, whose halves are each maximally mixed.</li>
+<li><strong>Any qubit becomes a record by dephasing</strong>, \(\Delta(\rho) = \sum_k |k\rangle\langle k|\rho|k\rangle\langle k|\): measuring and not looking.</li>
+</ul>
+<p>So "classical" just means "dephased in a known basis". No second formalism is needed: bits and qubits live in one density matrix, and the no-cloning theorem never bites on a record, because a diagonal state is a mixture of orthogonal basis states, and those can be copied.</p>
+<div class="data"><b>Checked</b>Dephasing R leaves \(\omega\) unchanged; CNOT onto \(|0\rangle\) copies the record exactly; on \(|{+}\rangle\) it gives a first qubit of purity 0.5. <code>instruments_checks.py</code>, L4.</div>
+<div class="check"><p class="q">Apply a Hadamard to the record of \(\omega = \sum_k|k\rangle\langle k|\otimes\rho_k\). When is the result still a cq state in the 0/1 basis?</p><button type="button">Show answer</button><p class="a" hidden>The off-diagonal block becomes \(\tfrac12(\rho_0-\rho_1)\). It vanishes only if \(\rho_0 = \rho_1\), that is, when the record was uncorrelated with the qubit anyway.</p></div>
+</article>
+
+<article data-unit="2" data-title="One map per outcome">
+<p>What turns a quantum state into a cq state?</p>
+<p>A <em>quantum instrument</em>: one map \(\mathcal E_k\) per outcome \(k\), each completely positive, written with Kraus operators,</p>
+<div class="math">\(\begin{gathered}\mathcal E_k(\rho) = \sum_j K_{kj}\,\rho\,K_{kj}^\dagger \\ \sum_{k,j} K_{kj}^\dagger K_{kj} = 1\end{gathered}\)</div>
+<p>The condition on the right makes the probabilities \(p_k = \mathrm{Tr}\,\mathcal E_k(\rho)\) add up to 1. The output is the cq state \(\sum_k |k\rangle\langle k|\otimes\mathcal E_k(\rho)\).</p>
+<p>A projective measurement has one Kraus operator per outcome, \(K_k = P_k\). A <em>weak</em> Z measurement has, with \(c = \cos\varphi\) and \(s = \sin\varphi\),</p>
+<div class="math">\(K_0 = \begin{pmatrix}c & 0\\ 0 & s\end{pmatrix},\qquad K_1 = \begin{pmatrix}s & 0\\ 0 & c\end{pmatrix}\)</div>
+<p>Then \(p_0 = \cos^2\!\varphi\,\rho_{00} + \sin^2\!\varphi\,\rho_{11}\). At \(\varphi = 0\) it is the projective measurement; at \(\varphi = \pi/4\) it learns nothing; at \(\varphi = \pi/8\) a \(|0\rangle\) answers 0 in 85% of runs. On \(|{+}\rangle\) both outcomes have probability 1/2, and outcome 0 leaves \(\cos\varphi|0\rangle + \sin\varphi|1\rangle\): the state is pulled part of the way towards \(|0\rangle\), not all the way.</p>
+<p>Read as one map, \(\rho\mapsto\sum_k|k\rangle\langle k|\otimes\mathcal E_k(\rho)\) is a channel (completely positive and trace preserving) from a qubit to record plus qubit. The idea goes back to Davies and Lewis (<a href="https://doi.org/10.1007/BF01647093">Commun. Math. Phys. 17, 239 (1970)</a>).</p>
+<div class="data"><b>Checked</b>The Kraus operators satisfy the completeness condition, the formula for \(p_0\) holds for random inputs, and the channel's Choi matrix is positive. <code>instruments_checks.py</code>, L5.</div>
+<div class="check"><p class="q">What does the weak measurement do to the state at \(\varphi = \pi/4\)?</p><button type="button">Show answer</button><p class="a" hidden>\(K_0 = K_1 = 1/\sqrt2\), so each branch is \(\rho/2\): a fair coin flip that neither learns about the state nor disturbs it.</p></div>
+</article>
+
+<article data-unit="2" data-title="Same odds, different instrument">
+<p>Do the outcome probabilities fix what a measurement does to the state?</p>
+<p>No. Compare two instruments on a qubit:</p>
+<div class="math">\(\begin{array}{l|cc} & K_0 & K_1 \\ \hline \text{Z measurement} & |0\rangle\langle 0| & |1\rangle\langle 1| \\ \text{reset} & |0\rangle\langle 0| & |0\rangle\langle 1|\end{array}\)</div>
+<p>Both give \(p_k = \langle k|\rho|k\rangle\) for every input. But Z measurement leaves \(|k\rangle\) in branch \(k\), while reset leaves \(|0\rangle\) in both. Forgetting the outcome, the first is dephasing and the second is the reset channel \(\rho\mapsto|0\rangle\langle0|\).</p>
+<p>The rule: probabilities depend only on the <em>effects</em> \(E_k = \sum_j K_{kj}^\dagger K_{kj}\) (together they form a POVM). The post-measurement states depend on the Kraus operators themselves, and any \(K_k \to U_k K_k\) with unitary \(U_k\) gives the same odds and different states. Among all instruments with given effects, \(K_k = \sqrt{E_k}\) is the <em>Lüders</em> instrument (Lüders, translated in <a href="https://arxiv.org/abs/quant-ph/0403007">arXiv:quant-ph/0403007</a>). The weak measurement of the last lesson is one.</p>
+<p>This is why "measure" on hardware has to say what happens to the qubit afterwards: measure-and-keep and measure-and-reset are different instruments with identical outcome statistics.</p>
+<div class="data"><b>Checked</b>Same \(p_k\) for random inputs; reset leaves \(|0\rangle\) in both branches; \(K_k = \sqrt{E_k}\) for the weak measurement. <code>instruments_checks.py</code>, L6.</div>
+<div class="check"><p class="q">You only see the outcomes of a device. Can you tell whether it resets?</p><button type="button">Show answer</button><p class="a" hidden>Not from one measurement. You need a later operation on the same qubit, for example measuring it again: Z measurement repeats outcome 1, reset gives 0.</p></div>
+</article>
+
+<article data-unit="2" data-title="Everything is an instrument">
+<p>How do states, channels and measurements fit into one picture?</p>
+<p>Each is a channel between systems that are quantum (Q), classical (R) or trivial (1, nothing). They differ only in which slots are which:</p>
+<table>
+<tr><th>Object</th><th>Map</th><th>Example</th></tr>
+<tr><td>state</td><td>1&nbsp;→&nbsp;Q</td><td>prepare \(|{+}\rangle\)</td></tr>
+<tr><td>distribution</td><td>1&nbsp;→&nbsp;R</td><td>a coin flip</td></tr>
+<tr><td>ensemble source</td><td>1&nbsp;→&nbsp;RQ</td><td>\(\omega_Z\) of lesson 3</td></tr>
+<tr><td>channel</td><td>Q&nbsp;→&nbsp;Q</td><td>an instrument with one outcome</td></tr>
+<tr><td>POVM</td><td>Q&nbsp;→&nbsp;R</td><td>an instrument, qubit discarded</td></tr>
+<tr><td>instrument</td><td>Q&nbsp;→&nbsp;RQ</td><td>weak measurement</td></tr>
+<tr><td>controlled operation</td><td>RQ&nbsp;→&nbsp;RQ</td><td>apply \(X\) if the record says 1</td></tr>
+<tr><td>stochastic map</td><td>R&nbsp;→&nbsp;R</td><td>a noisy classical bit</td></tr>
+</table>
+<p>Two moves come for free. <strong>Forgetting</strong> is a partial trace: the Z instrument followed by \(\mathrm{Tr}_R\) is dephasing, and followed by \(\mathrm{Tr}_Q\) it is the POVM \(\rho\mapsto\rho_{00}|0\rangle\langle0| + \rho_{11}|1\rangle\langle1|\). <strong>Postselection</strong> is the only step that is not a channel.</p>
+<p>The payoff is one composition rule (plug outputs into inputs) and one consistency condition (complete positivity and trace preservation). Measurement, preparation, feedforward and forgetting are no longer separate postulates. Textbook treatment: Watrous, <a href="https://doi.org/10.1017/9781316848142"><em>The Theory of Quantum Information</em> (2018)</a>.</p>
+<div class="data"><b>Checked</b>\(\mathrm{Tr}_R\) of the Z instrument is dephasing; \(\mathrm{Tr}_Q\) gives \(\mathrm{diag}(\rho)\) on the record. <code>instruments_checks.py</code>, L7.</div>
+<div class="check"><p class="q">Which slot pattern is a classically controlled preparation, like a BB84 sender choosing a state from two bits?</p><button type="button">Show answer</button><p class="a" hidden>R → Q: \(|ab\rangle\langle ab|\mapsto\rho_{ab}\). It is an encoder, the mirror image of a POVM.</p></div>
+</article>
+
+<article data-unit="2" data-title="Measuring is a gate plus a readout">
+<p>How is an instrument actually built?</p>
+<p>The way a mid-circuit measurement is done on a quantum computer: bring in an ancilla in \(|0\rangle\), apply a CNOT from the system to the ancilla, and read the ancilla in Z. The system's branches are</p>
+<div class="math">\(\begin{aligned}\mathcal E_k(\rho) &= \mathrm{Tr}_{a}\big[\Pi^a_k\,U(\rho\otimes|0\rangle\langle0|_a)U^\dagger\big] \\ &= |k\rangle\langle k|\,\rho\,|k\rangle\langle k|\end{aligned}\)</div>
+<p>with \(U\) the CNOT and \(\Pi^a_k = |k\rangle\langle k|\) on the ancilla. That is the Z instrument. The Kraus operators are read off the unitary as \(K_k = \langle k|_{\text{anc}}\,U\,|0\rangle_{\text{anc}}\). Swap the CNOT for a gentler controlled rotation, \(R_y(2\varphi)\) on the ancilla if the system is 0 and \(R_y(\pi - 2\varphi)\) if it is 1, and you get the weak measurement of lesson 5.</p>
+<p>Every instrument arises this way: a probe in a fixed state, a joint unitary, and a projective readout of the probe,</p>
+<div class="math">\(\mathcal E_k(\rho) = \mathrm{Tr}_E\!\left[(1\otimes P_k)\,U(\rho\otimes\sigma)U^\dagger\right]\)</div>
+<p>(Ozawa, <a href="https://doi.org/10.1063/1.526000">J. Math. Phys. 25, 79 (1984)</a>). It is the measurement version of writing a channel as a unitary on a larger system. A "measurement" is an interaction followed by reading a pointer, and the instrument is the bookkeeping of both. Mid-circuit measurements on real devices are benchmarked as instruments in exactly this sense (Rudinger et al., <a href="https://arxiv.org/abs/2103.03008">arXiv:2103.03008</a>).</p>
+<div class="data"><b>Checked</b>The CNOT circuit reproduces the Z instrument for random inputs; the controlled rotations give exactly \(K_0, K_1\) of the weak measurement. <code>instruments_checks.py</code>, L8.</div>
+<div class="check"><p class="q">Leave out the CNOT but still read the ancilla. Which instrument is that?</p><button type="button">Show answer</button><p class="a" hidden>Outcome 0 every time, with \(\mathcal E_0 = \mathrm{id}\): the identity channel with a useless record. No interaction, no information.</p></div>
+</article>
+
+<article data-unit="3" data-title="Feedforward is a controlled map">
+<p>How does an operation that depends on an earlier outcome act on \(\omega\)?</p>
+<p>Branch by branch. A classically controlled unitary is</p>
+<div class="math">\(\mathcal C\big(|k\rangle\langle k|\otimes\tau\big) = |k\rangle\langle k|\otimes U_k\,\tau\,U_k^\dagger\)</div>
+<p>Because the record is diagonal, \(\mathcal C\) never mixes blocks; it rewrites each one with its own gate.</p>
+<p>Example: reset by feedback. Measure a qubit in Z, then apply \(X\) if the outcome was 1:</p>
+<div class="math">\(\begin{gathered}|0\rangle\langle0|\otimes\rho_{00}|0\rangle\langle0| \\ + \,|1\rangle\langle1|\otimes\rho_{11}|1\rangle\langle1| \\ \Big\downarrow\,\mathcal C \\ \begin{pmatrix}\rho_{00} & 0\\0 & \rho_{11}\end{pmatrix}_R\otimes|0\rangle\langle0|\end{gathered}\)</div>
+<p>Every branch now holds the same state, so the cq state is a product: the record has become plain noise and can be thrown away. This is the signature of a protocol that works <em>deterministically</em> despite random outcomes: after the corrections, \(\omega = \sigma_R\otimes\rho_{\text{out}}\). Teleportation and MBQC end this way.</p>
+<div class="data"><b>Checked</b>For random inputs the output is \(\mathrm{diag}(\rho_{00},\rho_{11})\otimes|0\rangle\langle0|\). <code>instruments_checks.py</code>, L9.</div>
+<div class="check"><p class="q">Apply \(H\) instead of \(X\) when the outcome is 1. Does the record decouple?</p><button type="button">Show answer</button><p class="a" hidden>No: you get \(|0\rangle\langle0|\otimes\rho_{00}|0\rangle\langle0| + |1\rangle\langle1|\otimes\rho_{11}|{+}\rangle\langle{+}|\). The branches differ, so the record still tells you which state you hold.</p></div>
+</article>
+
+<article data-unit="3" data-title="Deferred measurement">
+<p>Can classical control always be replaced by quantum control?</p>
+<p>Yes. Compare, on any two-qubit input:</p>
+<ul>
+<li>measure qubit 1 in Z, then apply \(X\) to qubit 2 if the outcome is 1;</li>
+<li>apply CNOT from qubit 1 to qubit 2, then measure qubit 1 in Z.</li>
+</ul>
+<p>They give the same cq state. The reason is one line: the controlled map \(\sum_k|k\rangle\langle k|\otimes U_k\) <em>is</em> the controlled-\(U\) gate, and it commutes with a Z measurement of its control, because both are diagonal on the control.</p>
+<p>This is the principle of deferred measurement (Nielsen and Chuang, <a href="https://doi.org/10.1017/CBO9780511976667"><em>Quantum Computation and Quantum Information</em></a>, §4.4). It lets you push every measurement to the end and analyse a feedforward protocol as a unitary circuit. The price is that the control qubit has to stay coherent until the end. Hardware with fast feedforward goes the other way: it measures early and reuses the qubit.</p>
+<div class="data"><b>Checked</b>Equal cq states for random two-qubit mixed inputs. <code>instruments_checks.py</code>, L10.</div>
+<div class="check"><p class="q">Why does the swap fail if qubit 1 is measured in the X basis?</p><button type="button">Show answer</button><p class="a" hidden>The controlled gate is diagonal in Z on the control, so it does not commute with an X measurement there. Classical control only exists in the basis the record is diagonal in.</p></div>
+</article>
+
+<article data-unit="3" data-title="Adaptive steps grow a tree">
+<p>How do you write a protocol whose next measurement depends on the last outcome?</p>
+<p>Let the first instrument be \(\{\mathcal E_k\}\) and the second be chosen by \(k\), \(\{\mathcal F^{(k)}_l\}\). The record grows by one label per step:</p>
+<div class="math">\(\omega = \sum_{k,l} |k\,l\rangle\langle k\,l| \otimes \mathcal F^{(k)}_l\big(\mathcal E_k(\rho)\big)\)</div>
+<p>Example: input \(\cos\tfrac\pi8|0\rangle + \sin\tfrac\pi8|1\rangle\). Measure Z; on outcome 0 measure X, on outcome 1 measure Z again.</p>
+<div class="tn" data-d="tree"></div>
+<p>The leaves are the blocks of \(\omega\), and the probability of a leaf is the trace of its block. Branch \((1,0)\) has probability 0: a second Z measurement repeats the first.</p>
+<p>A whole adaptive protocol is still one channel, from the input to (record, output). In each run only one path is realized, but \(\omega\) holds all of them. The general theory of such networks, with quantum and classical wires between steps, is the theory of <em>quantum combs</em> (Chiribella, D'Ariano and Perinotti, <a href="https://arxiv.org/abs/0904.4483">arXiv:0904.4483</a>).</p>
+<div class="data"><b>Checked</b>\(p(00) = p(01) = 0.4268\), \(p(10) = 0\), \(p(11) = 0.1464\). <code>instruments_checks.py</code>, L11.</div>
+<div class="check"><p class="q">Merge the leaves \((1,0)\) and \((1,1)\) into one label. Is the result still an instrument?</p><button type="button">Show answer</button><p class="a" hidden>Yes. A sum of completely positive maps is completely positive, and the total is still trace preserving. Merging labels is how you forget part of a record.</p></div>
+</article>
+
+<article data-unit="4" data-title="Teleportation in four maps">
+<p>What is the state of everything after each step of teleportation?</p>
+<p>Registers: \(A'\) holds the input \(\rho\); \(A\) and \(B\) share \(|\Phi^+\rangle = (|00\rangle+|11\rangle)/\sqrt2\); \(R\) is a 2-bit record \(ab\). Label the Bell basis by \(|\beta_{ab}\rangle = (1\otimes X^aZ^b)|\Phi^+\rangle\). One identity does all the work:</p>
+<div class="math">\(\begin{aligned}(\langle\beta_{ab}|_{A'A}\otimes 1_B)&\,|\psi\rangle_{A'}|\Phi^+\rangle_{AB} \\ &= \tfrac12\,X^aZ^b|\psi\rangle_B\end{aligned}\)</div>
+<p>Now the maps, one per step:</p>
+<ul>
+<li><strong>Prepare.</strong> \(\omega_0 = \rho_{A'}\otimes|\Phi^+\rangle\langle\Phi^+|_{AB}\).</li>
+<li><strong>Bell-measure \(A'A\), discard them.</strong> By the identity,
+<div class="math">\(\begin{aligned}\omega_1 = \tfrac14\sum_{ab}&|ab\rangle\langle ab|_R \\ &\otimes X^aZ^b\,\rho\,Z^bX^a\end{aligned}\)</div></li>
+<li><strong>Send \(R\) to Bob.</strong> The identity map on \(R\): only who holds it changes.</li>
+<li><strong>Correct.</strong> Apply \(Z^bX^a\) controlled by \(R\): \(\omega_2 = \tfrac14 1_R\otimes\rho\). The record decouples (lesson 9), so throw it away: Bob holds \(\rho\).</li>
+</ul>
+<p>The composition of the four maps is the identity channel from \(A'\) to \(B\), for every input, with no postselection (Bennett et al., <a href="https://doi.org/10.1103/PhysRevLett.70.1895">Phys. Rev. Lett. 70, 1895 (1993)</a>).</p>
+<div class="data"><b>Checked</b>The identity for random \(|\psi\rangle\); each block of \(\omega_1\) equals \(\tfrac14X^aZ^b\rho Z^bX^a\); \(\omega_2 = \tfrac14 1\otimes\rho\). <code>instruments_checks.py</code>, L12–13.</div>
+<div class="check"><p class="q">What is the probability of outcome \(ab = 11\)?</p><button type="button">Show answer</button><p class="a" hidden>1/4, the trace of its block, whatever \(\rho\) is. The outcomes reveal nothing about the input.</p></div>
+</article>
+
+<article data-unit="4" data-title="What the record carries">
+<p>Between Alice's measurement and Bob's correction, where is the input?</p>
+<p>Read \(\omega_1 = \tfrac14\sum_{ab}|ab\rangle\langle ab|\otimes X^aZ^b\rho Z^bX^a\) with the moves of lesson 2:</p>
+<ul>
+<li><strong>Bob alone</strong>, \(\mathrm{Tr}_R\,\omega_1 = 1/2\): maximally mixed, independent of \(\rho\). That is why teleportation cannot send a signal faster than the record travels.</li>
+<li><strong>The record alone</strong>, \(\mathrm{Tr}_B\,\omega_1 = 1_R/4\): uniform noise.</li>
+</ul>
+<p>All of \(\rho\) sits in the correlation between \(R\) and \(B\). Now break the classical link and see what reaches Bob:</p>
+<ul>
+<li>Bob receives only \(a\), and applies \(X^a\): he gets \(\tfrac12(\rho + Z\rho Z)\), the input dephased.</li>
+<li>Bit \(a\) is flipped in transit with probability \(q\): he gets \((1-q)\rho + q\,X\rho X\).</li>
+</ul>
+<p>A noisy classical channel turns into a Pauli channel on the qubit. In the cq picture this is just a stochastic map R → R inserted before the controlled correction.</p>
+<div class="data"><b>Checked</b>Both marginals; the dephased output with only \(a\); the bit-flip output for \(q = 0.1\). <code>instruments_checks.py</code>, L12–13.</div>
+<div class="check"><p class="q">Bit \(b\) is flipped with probability \(q\) instead. What does Bob get?</p><button type="button">Show answer</button><p class="a" hidden>\((1-q)\rho + q\,Z\rho Z\). The wrong correction leaves an extra \(Z\) on the branch.</p></div>
+</article>
+
+<article data-unit="5" data-title="Syndrome extraction">
+<p>What does an error-correction cycle look like as a cq state?</p>
+<p>The bit-flip code stores a qubit as \(\alpha|000\rangle+\beta|111\rangle\). Let each qubit flip independently with probability \(p\). To find out which one flipped, measure the parities \(Z_1Z_2\) and \(Z_2Z_3\): two ancillas, four CNOTs, read the ancillas, exactly the construction of lesson 8. The result is a cq state with a 2-bit syndrome record \(s\):</p>
+<div class="math">\(\begin{gathered}\omega = \sum_s |s\rangle\langle s|\otimes\rho_s \\ \rho_{00} = (1-p)^3\,\rho_L + p^3\,X_L\rho_LX_L\end{gathered}\)</div>
+<p>where \(\rho_L\) is the encoded state and \(X_L = X_1X_2X_3\). Each block mixes the two error patterns that give the same syndrome; for \(s = 10\) they are "qubit 1 flipped" and "qubits 2 and 3 flipped". At \(p = 0.1\):</p>
+<div class="math">\(\begin{aligned}p(00) &= (1-p)^3 + p^3 = 0.73 \\ p(s \ne 00) &= p(1-p)^2 + p^2(1-p) \\ &= 0.09\end{aligned}\)</div>
+<p>The parity measurements never touch \(\alpha\) and \(\beta\): both parities are \(+1\) on \(|000\rangle\) and on \(|111\rangle\), so the record learns which error happened and nothing about the encoded state. A fault-tolerant computer repeats this every cycle as mid-circuit measurements (Gottesman, <a href="https://arxiv.org/abs/0904.2557">arXiv:0904.2557</a>).</p>
+<div class="data"><b>Checked</b>The four syndrome probabilities; the ancilla circuit gives the same blocks as the parity projectors. <code>instruments_checks.py</code>, L14–15.</div>
+<div class="check"><p class="q">Why not measure \(Z_1\) directly to find a flip?</p><button type="button">Show answer</button><p class="a" hidden>\(Z_1\) tells \(|000\rangle\) from \(|111\rangle\), so it would collapse \(\alpha|000\rangle+\beta|111\rangle\). Parities are blind to the encoded state.</p></div>
+</article>
+
+<article data-unit="5" data-title="Decoding is feedforward">
+<p>How does a syndrome record become a better qubit?</p>
+<p>Decoding is a classically controlled map: flip the qubit the syndrome points to, \(10\to X_1\), \(11\to X_2\), \(01\to X_3\), nothing on \(00\). Each block then holds the right state unless two or three qubits had flipped. Forgetting the syndrome,</p>
+<div class="math">\(\begin{gathered}\rho_{\text{out}} = (1-p_L)\,\rho_L + p_L\,X_L\rho_LX_L \\ p_L = 3p^2 - 2p^3\end{gathered}\)</div>
+<p>At \(p = 0.1\), \(p_L = 0.028\). Error correction is feedforward, and what is left is a logical channel with a smaller error rate.</p>
+<p>Unlike teleportation, the record does not fully decouple: how likely a logical error is depends on the syndrome. Keep only runs with syndrome 00 and the logical error drops to \(p^3/[(1-p)^3+p^3] = 0.0014\), at the cost of discarding 27% of runs. That is error <em>detection</em>: postselection on the syndrome record.</p>
+<p>Since every correction here is a Pauli, a real device often does not apply it at all. It keeps the correction in software and reinterprets later outcomes, the same bookkeeping as the Pauli frame in MBQC.</p>
+<div class="data"><b>Checked</b>\(\rho_{\text{out}}\) with \(p_L = 0.0280\); postselected logical error 0.00137, kept in 73% of runs. <code>instruments_checks.py</code>, L14–15.</div>
+<div class="check"><p class="q">For which \(p\) does the code help, \(p_L &lt; p\)?</p><button type="button">Show answer</button><p class="a" hidden>\(3p^2 - 2p^3 &lt; p \iff (2p-1)(p-1) &gt; 0 \iff p &lt; 1/2\).</p></div>
+</article>
+
+<article data-unit="6" data-title="An MBQC step in cq form">
+<p>What does measuring one qubit of a cluster do, branch by branch?</p>
+<p>Use the conventions of the <a href="pocket-course.html">MBQC pocket course</a>: measurement basis \(|s_\theta\rangle = (|0\rangle + (-1)^se^{i\theta}|1\rangle)/\sqrt2\) with outcome \(s\), and \(J(\theta) = H\,P(-\theta)\). Qubit 1 holds \(\rho\), qubit 2 starts in \(|{+}\rangle\). Three maps:</p>
+<ul>
+<li>CZ on qubits 1 and 2;</li>
+<li>the instrument \(\{|s_\theta\rangle\langle s_\theta|\}\) on qubit 1, outcome into a 1-bit record \(S\);</li>
+<li>discard qubit 1.</li>
+</ul>
+<p>With \(J = J(\theta)\), the result is</p>
+<div class="math">\(\omega = \tfrac12\sum_s|s\rangle\langle s|_S\otimes X^sJ\rho J^\dagger X^s\)</div>
+<p>It has the same shape as teleportation's \(\omega_1\), with one record bit instead of two and a gate \(J(\theta)\) left behind. The "Bell pair" is a single CZ bond to a \(|{+}\rangle\) qubit.</p>
+<p>Forgetting \(s\) keeps only the X component of the Bloch vector of \(J\rho J^\dagger\): without the record, the step is useless. MBQC does not undo the byproduct on the spot; it keeps the record (Raussendorf, Browne and Briegel, <a href="https://arxiv.org/abs/quant-ph/0301052">arXiv:quant-ph/0301052</a>).</p>
+<div class="data"><b>Checked</b>Both blocks for random inputs at \(\theta = 0.9\); the forgotten state's Bloch vector is \((n_x, 0, 0)\). <code>instruments_checks.py</code>, L16.</div>
+<div class="check"><p class="q">Why is each outcome exactly 50% likely, whatever \(\rho\) is?</p><button type="button">Show answer</button><p class="a" hidden>Each block is \(\tfrac12\) times a unitary applied to \(\rho\), so its trace is \(\tfrac12\). The outcome carries no information about the logical state, which is what lets the computation go on undisturbed.</p></div>
+</article>
+
+<article data-unit="6" data-title="Angles are steered by the record">
+<p>How does the record decide the next measurement?</p>
+<p>Chain two steps on a wire 1–2–3. After the first, qubit 2 holds \(X^{s_1}J(\theta_1)\rho\,J(\theta_1)^\dagger X^{s_1}\). The second measurement is an instrument <em>controlled by</em> \(S_1\): its angle is \((-1)^{s_1}\theta_2\). Using \(J(\varphi)X \simeq Z\,J(-\varphi)\) (equal up to a global phase), every branch comes out as</p>
+<div class="math">\(\begin{gathered}X^{s_2}Z^{s_1}\,U\rho\, U^\dagger\,Z^{s_1}X^{s_2} \\ U = J(\theta_2)J(\theta_1)\end{gathered}\)</div>
+<p>so the right gates were applied in all four branches, up to a Pauli fixed by the record. Without adapting, branch \(s_1 = 1\) gets \(J(-\theta_2)\) instead of \(J(\theta_2)\), and no Pauli correction repairs that.</p>
+<p>In the cq picture a controlled instrument is a map from (record, qubit) to (longer record, qubit), and it is no harder to write than a controlled gate. Which Pauli each branch carries is the Pauli frame of the MBQC course.</p>
+<div class="data"><b>Checked</b>All four adaptive branches at \(\theta_1 = 0.9\), \(\theta_2 = 0.4\); without adapting, the best Pauli-corrected fidelity in branch \(s_1 = 1\) is 0.907. <code>instruments_checks.py</code>, L17.</div>
+<div class="check"><p class="q">At \(\theta_2 = \pi/2\), does the second angle need adapting?</p><button type="button">Show answer</button><p class="a" hidden>No. \(J(-\pi/2) = J(\pi/2)\,Z\) up to phase, so the "wrong" branch differs only by a Pauli, which the record absorbs. Clifford angles never wait for earlier outcomes.</p></div>
+</article>
+
+<article data-unit="6" data-title="Entangle first, measure later">
+<p>Why can all the CZs of a computation be done before any measurement?</p>
+<p>Write the two-step wire as a composition of maps, read right to left (\(\mathcal P_k\) prepares \(|{+}\rangle_k\), \(\mathcal Z_{jk}\) is a CZ, \(\mathcal M_k\) the measurement of qubit \(k\)):</p>
+<div class="math">\(\begin{aligned}\Phi = {}&\mathcal M_2\circ\mathcal Z_{23}\circ\mathcal P_3 \\ &\circ\mathcal M_1\circ\mathcal Z_{12}\circ\mathcal P_2\circ\mathcal P_1\end{aligned}\)</div>
+<p>One rule moves things: <strong>maps on disjoint systems commute</strong>. \(\mathcal Z_{23}\circ\mathcal P_3\) touches qubits 2 and 3; \(\mathcal M_1\) touches qubit 1 and writes \(S_1\). So they swap, and</p>
+<div class="math">\(\begin{gathered}\Phi = \mathcal M_2\circ\mathcal M_1\big(|C_3\rangle\langle C_3|\big) \\ |C_3\rangle = \mathrm{CZ}_{23}\mathrm{CZ}_{12}|{+}{+}{+}\rangle\end{gathered}\)</div>
+<div class="tn" data-d="wire"></div>
+<p>Two things cannot move. \(\mathcal Z_{23}\) cannot pass \(\mathcal M_2\): both act on qubit 2. And \(\mathcal M_2\) cannot pass \(\mathcal M_1\): it reads \(S_1\). The classical control is the only time order left.</p>
+<p>That is the resource-state picture of MBQC: the cluster is the same for every program, and the program lives in the angles and their feedforward (Raussendorf and Briegel, <a href="https://arxiv.org/abs/quant-ph/0010033">arXiv:quant-ph/0010033</a>). It is also why photonic machines can weave the cluster on the fly, just ahead of the measurements.</p>
+<div class="data"><b>Checked</b>The sequential and cluster-first orders give the same cq state, branch by branch: each of the four blocks is \(\tfrac14\) times the projector onto \(X^{s_2}Z^{s_1}J(\theta_2)J(\theta_1)|{+}\rangle\). <code>instruments_checks.py</code>, L18.</div>
+<div class="check"><p class="q">Could \(\mathcal Z_{12}\) be applied after \(\mathcal M_1\)?</p><button type="button">Show answer</button><p class="a" hidden>No. \(\mathcal M_1\) consumes qubit 1, so every edge at a qubit must come before that qubit is measured.</p></div>
+</article>
+
+<article data-unit="7" data-title="Physics that lives in the branches">
+<p>When does the cq state hold physics that the averaged state cannot show?</p>
+<p>Take the GHZ state \((|000\rangle+|111\rangle)/\sqrt2\) on A, B, C and measure A, either in X or in Z.</p>
+<ul>
+<li><strong>X:</strong> each branch leaves BC in \((|00\rangle\pm|11\rangle)/\sqrt2\), a Bell pair: 1 ebit per branch.</li>
+<li><strong>Z:</strong> each branch leaves \(|00\rangle\) or \(|11\rangle\): no entanglement.</li>
+</ul>
+<p>Yet forgetting the outcome gives the same \(\rho_{BC} = \tfrac12(|00\rangle\langle00| + |11\rangle\langle11|)\) in both cases, a separable state. The difference sits in a <em>nonlinear</em> function of the blocks, the average branch entanglement \(\sum_k p_k\,E(\rho_k/p_k)\), which \(\mathrm{Tr}_R\,\omega\) cannot see.</p>
+<p>This is the entanglement a measurement can concentrate, called localizable entanglement (Verstraete, Popp and Cirac, <a href="https://arxiv.org/abs/quant-ph/0307009">arXiv:quant-ph/0307009</a>). It is also the mechanism of measurement-induced phase transitions in monitored circuits: averaged over outcomes the state is featureless, and the transition appears only in branch-wise entropies (Skinner, Ruhman and Nahum, <a href="https://arxiv.org/abs/1808.05953">arXiv:1808.05953</a>; Li, Chen and Fisher, <a href="https://arxiv.org/abs/1808.06134">arXiv:1808.06134</a>). To see it in an experiment you must know which branch you are in, which is why these experiments face a postselection problem.</p>
+<div class="data"><b>Checked</b>Branch entropies 1 and 1 ebit (X) or 0 and 0 (Z); the same averaged \(\rho_{BC}\), whose partial transpose has no negative eigenvalue. <code>instruments_checks.py</code>, L19.</div>
+<div class="check"><p class="q">Which measurement on A gives BC the most entanglement on average?</p><button type="button">Show answer</button><p class="a" hidden>Any basis on the equator of the Bloch sphere, such as X or Y: each branch is a maximally entangled state of BC, so the average is 1 ebit.</p></div>
+</article>
+
+<article data-unit="7" data-title="Where to go next">
+<p>You now have one object, the cq state, and one kind of move, a channel between quantum and classical systems. Where it leads:</p>
+<ul>
+<li><strong>Quantum combs and process tensors.</strong> A whole multi-step protocol with an unknown middle as one object (Chiribella, D'Ariano and Perinotti <a href="https://arxiv.org/abs/0904.4483">arXiv:0904.4483</a>; Pollock et al. <a href="https://arxiv.org/abs/1512.00589">arXiv:1512.00589</a>).</li>
+<li><strong>LOCC.</strong> What distant parties can do with local instruments and classical messages, and why it is hard to characterize (Chitambar et al. <a href="https://arxiv.org/abs/1210.4583">arXiv:1210.4583</a>).</li>
+<li><strong>Information versus disturbance.</strong> An instrument that never disturbs any state learns nothing (Busch <a href="https://arxiv.org/abs/0706.3526">arXiv:0706.3526</a>).</li>
+<li><strong>Instruments on real hardware.</strong> How errors of mid-circuit measurements are modelled and read off, one superoperator per outcome (Hashim <a href="https://arxiv.org/abs/2604.18884">arXiv:2604.18884</a>).</li>
+<li><strong>Quantum trajectories.</strong> A Lindblad equation is the branch average of a continuously measured system; each trajectory is one path of the tree (Daley <a href="https://arxiv.org/abs/1405.6694">arXiv:1405.6694</a>).</li>
+<li><strong>Long-range entanglement from measurement.</strong> Measurement plus feedforward prepares topological order in constant depth (Tantivasadakarn, Thorngren, Vishwanath and Verresen <a href="https://arxiv.org/abs/2112.01519">arXiv:2112.01519</a>).</li>
+<li><strong>What is quantum about MBQC.</strong> The record and feedforward are classical; the power comes from contextual correlations in the resource (Anders and Browne <a href="https://arxiv.org/abs/0805.1002">arXiv:0805.1002</a>; Raussendorf <a href="https://arxiv.org/abs/0907.5449">arXiv:0907.5449</a>).</li>
+</ul>
+<p>Every formula in these lessons is checked in <code>docs/instruments_checks.py</code> of <code>mbqc-course</code>, which needs only NumPy.</p>
+<div class="check"><p class="q">Which protocols in this course needed postselection to work?</p><button type="button">Show answer</button><p class="a" hidden>None. Teleportation, error correction and MBQC all correct every branch with feedforward; postselection appeared only as an option, in error detection.</p></div>
+</article>
+
+</div>
+</div>
+
+<script>
+window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+<script>
+(function () {
+  const DIAGRAMS = {
+    tree: { w: 340, h: 200, alt: "the branching tree: measure Z, then X after outcome 0 or Z after outcome 1, with the probability of each leaf",
+      nodes: [{ id: "r", x: 36, y: 100, t: "ρ", tone: "accent" }, { id: "a", x: 140, y: 55, t: "0" }, { id: "b", x: 140, y: 150, t: "1" },
+        { id: "l00", x: 245, y: 25, t: "00", tone: "soft" }, { id: "l01", x: 245, y: 85, t: "01", tone: "soft" },
+        { id: "l10", x: 245, y: 130, t: "10", tone: "soft" }, { id: "l11", x: 245, y: 178, t: "11", tone: "soft" }],
+      edges: [["r", "a"], ["r", "b"], ["a", "l00"], ["a", "l01"], ["b", "l10"], ["b", "l11"]],
+      texts: [{ x: 80, y: 64, t: "Z", small: 1 }, { x: 80, y: 148, t: "Z", small: 1 }, { x: 192, y: 34, t: "X", small: 1 }, { x: 192, y: 94, t: "X", small: 1 },
+        { x: 192, y: 133, t: "Z", small: 1 }, { x: 192, y: 177, t: "Z", small: 1 },
+        { x: 268, y: 29, t: "0.427", a: "start", small: 1 }, { x: 268, y: 89, t: "0.427", a: "start", small: 1 },
+        { x: 268, y: 134, t: "0", a: "start", small: 1 }, { x: 268, y: 182, t: "0.146", a: "start", small: 1 }] },
+    wire: { w: 340, h: 112, alt: "the three-qubit cluster wire 1-2-3: qubit 1 measured at angle theta 1 with outcome s1, qubit 2 at (-1)^s1 theta 2 with outcome s2, qubit 3 is the output",
+      nodes: [{ id: "q1", x: 60, y: 28, t: "1" }, { id: "q2", x: 170, y: 28, t: "2" }, { id: "q3", x: 280, y: 28, t: "3", tone: "accent" }],
+      edges: [["q1", "q2", "CZ"], ["q2", "q3", "CZ"]],
+      texts: [{ x: 60, y: 64, t: "angle θ₁", small: 1 }, { x: 60, y: 80, t: "outcome s₁", small: 1 },
+        { x: 170, y: 64, t: "angle (−1)ˢ¹θ₂", small: 1 }, { x: 170, y: 80, t: "outcome s₂", small: 1 },
+        { x: 280, y: 64, t: "output", small: 1 }, { x: 170, y: 104, t: "qubit 2's angle is read from the record S₁", small: 1 }] },
+  };
+  // ---- Tensor-network diagrams -------------------------------------------------
+  // Each diagram is a small spec: nodes (tensors), edges (contracted indices),
+  // legs (open indices), plus optional raw lines, paths, dashed boxes and text.
+  const R = 15; // node half-size in px
+  const SHAPES = {
+    circle: (n) => `<circle cx="${n.x}" cy="${n.y}" r="${R}"/>`,
+    square: (n) => `<rect x="${n.x - R + 2}" y="${n.y - R + 2}" width="${2 * R - 4}" height="${2 * R - 4}" rx="3"/>`,
+    diamond: (n) => `<polygon points="${n.x},${n.y - R} ${n.x + R},${n.y} ${n.x},${n.y + R} ${n.x - R},${n.y}"/>`,
+    triR: (n) => `<polygon points="${n.x - R},${n.y - R} ${n.x + R},${n.y} ${n.x - R},${n.y + R}"/>`,
+    triL: (n) => `<polygon points="${n.x + R},${n.y - R} ${n.x - R},${n.y} ${n.x + R},${n.y + R}"/>`,
+    box: (n) => `<rect x="${n.x - n.w / 2}" y="${n.y - R}" width="${n.w}" height="${2 * R}" rx="6"/>`,
+    env: (n) => `<rect x="${n.x - 13}" y="${n.y - n.h / 2}" width="26" height="${n.h}" rx="6"/>`,
+  };
+  const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function drawDiagram(d) {
+    const by = Object.fromEntries((d.nodes || []).map((n) => [n.id, n]));
+    let out = "";
+    for (const b of d.boxes || [])
+      out += `<rect class="tn-box${b.c ? " " + b.c : ""}" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="8"/>` +
+        (b.t ? `<text class="tn-boxlabel${b.c ? " " + b.c : ""}" x="${b.x + 4}" y="${b.y - 5}">${esc(b.t)}</text>` : "");
+    for (const p of d.paths || []) out += `<path class="tn-line" d="${p}"/>`;
+    for (const l of d.lines || []) out += `<line class="tn-line${l[4] ? " thick" : ""}" x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}"/>`;
+    for (const e of d.edges || []) {
+      const a = by[e[0]], b = by[e[1]];
+      out += `<line class="tn-line${e[3] ? " thick" : ""}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`;
+      if (e[2]) out += `<text class="tn-idx" x="${(a.x + b.x) / 2 + (a.y === b.y ? 0 : 7)}" y="${(a.y + b.y) / 2 + (a.y === b.y ? -6 : 4)}" text-anchor="${a.y === b.y ? "middle" : "start"}">${esc(e[2])}</text>`;
+    }
+    for (const g of d.legs || []) {
+      const n = by[g[0]], x2 = n.x + g[1], y2 = n.y + g[2];
+      out += `<line class="tn-line${g[4] ? " thick" : ""}" x1="${n.x}" y1="${n.y}" x2="${x2}" y2="${y2}"/>`;
+      if (g[3]) {
+        const anchor = g[1] > 0 && g[2] === 0 ? "start" : g[1] < 0 && g[2] === 0 ? "end" : "middle";
+        const lx = x2 + (anchor === "start" ? 4 : anchor === "end" ? -4 : 0);
+        const ly = y2 + (g[2] > 0 ? 13 : g[2] < 0 ? -5 : 4);
+        out += `<text class="tn-idx" x="${lx}" y="${ly}" text-anchor="${anchor}">${esc(g[3])}</text>`;
+      }
+    }
+    for (const n of d.nodes || []) {
+      out += `<g class="tn-node ${n.tone || ""}">${SHAPES[n.s || "circle"](n)}</g>`;
+      if (n.t) {
+        const dx = n.s === "triR" ? -5 : n.s === "triL" ? 5 : 0;
+        out += `<text class="tn-label${n.tone === "accent" ? " on-accent" : ""}${String(n.t).length > 2 && n.s !== "box" ? " tight" : ""}" x="${n.x + dx}" y="${n.y + 4.5}" text-anchor="middle">${esc(n.t)}</text>`;
+      }
+    }
+    for (const t of d.texts || [])
+      out += `<text class="tn-text${t.small ? " small" : ""}" x="${t.x}" y="${t.y}" text-anchor="${t.a || "middle"}">${esc(t.t)}</text>`;
+    return `<svg viewBox="0 0 ${d.w} ${d.h}" width="${d.w}" role="img" aria-label="${esc(d.alt || "tensor network diagram")}">${out}</svg>`;
+  }
+  function renderDiagrams(root) {
+    root.querySelectorAll(".tn[data-d]").forEach((el) => {
+      const d = DIAGRAMS[el.dataset.d];
+      if (d) el.innerHTML = drawDiagram(d);
+    });
+  }
+
+  const units = {
+    0: ["Start here", "One density matrix that holds every outcome and its probability."],
+    1: ["The cq state", "Reading it, why the record matters, and what makes a record classical."],
+    2: ["Instruments", "The maps that make cq states, and how they are built."],
+    3: ["Classical control", "Feedforward, deferred measurement, and adaptive trees."],
+    4: ["Teleportation", "The protocol as four maps, and where the information sits."],
+    5: ["Error correction", "Syndromes are records; decoding is feedforward."],
+    6: ["MBQC", "Byproducts, adaptive angles, and why the cluster can come first."],
+    7: ["Beyond averages", "Physics that only shows up branch by branch, and where to go next."],
+  };
+  const $ = (id) => document.getElementById(id);
+  const lessons = Array.from(document.querySelectorAll("#lessons article"));
+  const total = lessons.length;
+  $("nLessons").textContent = String(total);
+  $("pos").textContent = `1 / ${total}`;
+  // Progress is stored by lesson title, so adding lessons later keeps the ticks in place.
+  const titles = lessons.map((el) => el.dataset.title);
+  const KEY = "instruments-pocket-v1";
+  let state = { done: [], last: titles[0] };
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && Array.isArray(s.done)) state = s;
+  } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+  const isDone = (i) => state.done.includes(titles[i]);
+
+  const home = $("home"), reader = $("reader"), stage = $("stage");
+  let current = 0;
+
+  function renderHome() {
+    const box = $("units");
+    box.innerHTML = "";
+    Object.keys(units).forEach((u) => {
+      const sec = document.createElement("div");
+      sec.className = "unit";
+      sec.innerHTML = `<h2>Part ${u} · ${units[u][0]}</h2><p class="blurb">${units[u][1]}</p>`;
+      lessons.forEach((el, i) => {
+        if (el.dataset.unit !== u) return;
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "row" + (isDone(i) ? " is-done" : "");
+        b.innerHTML = `<span class="n">${i + 1}</span><span class="t">${el.dataset.title}</span><span class="mark" aria-label="${isDone(i) ? "done" : "not done"}"></span>`;
+        b.addEventListener("click", () => open(i));
+        sec.appendChild(b);
+      });
+      box.appendChild(sec);
+    });
+    const n = titles.filter((t) => state.done.includes(t)).length;
+    $("bar").style.width = (100 * n / total) + "%";
+    $("count").textContent = `${n} of ${total} done`;
+    let next = 0;
+    while (next < total && isDone(next)) next++;
+    if (next >= total) next = Math.max(0, titles.indexOf(state.last));
+    const c = $("continue");
+    c.innerHTML = (n === 0 ? "Start with lesson 1" : n === total ? "Review: lesson " + (next + 1) : "Continue: lesson " + (next + 1)) + `<span>${lessons[next].dataset.title}</span>`;
+    c.onclick = () => open(next);
+  }
+
+  function typeset(el) {
+    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(() => {});
+    else setTimeout(() => typeset(el), 300);
+  }
+
+  function open(i) {
+    current = i;
+    state.last = titles[i]; save();
+    const src = lessons[i];
+    stage.innerHTML = `<div class="lesson"><div class="unitname">Part ${src.dataset.unit} · ${units[src.dataset.unit][0]}</div><h2>${src.dataset.title}</h2>${src.innerHTML}</div>`;
+    stage.querySelectorAll(".check button").forEach((b) => {
+      b.addEventListener("click", () => {
+        const a = b.nextElementSibling;
+        a.hidden = !a.hidden;
+        b.textContent = a.hidden ? "Show answer" : "Hide answer";
+      });
+    });
+    $("pos").textContent = `${i + 1} / ${total}`;
+    $("prev").disabled = i === 0;
+    $("prev").style.visibility = i === 0 ? "hidden" : "visible";
+    $("next").textContent = i === total - 1 ? "Finish ✓" : "Got it, next →";
+    home.hidden = true; reader.hidden = false;
+    window.scrollTo(0, 0);
+    renderDiagrams(stage);
+    typeset(stage);
+  }
+
+  function goHome() { reader.hidden = true; home.hidden = false; renderHome(); window.scrollTo(0, 0); }
+
+  $("back").addEventListener("click", goHome);
+  $("prev").addEventListener("click", () => { if (current > 0) open(current - 1); });
+  $("next").addEventListener("click", () => {
+    if (!isDone(current)) { state.done.push(titles[current]); save(); }
+    if (current < total - 1) open(current + 1); else goHome();
+  });
+  $("reset").addEventListener("click", () => { $("resetConfirm").hidden = false; });
+  $("resetNo").addEventListener("click", () => { $("resetConfirm").hidden = true; });
+  $("resetYes").addEventListener("click", () => { state = { done: [], last: titles[0] }; save(); $("resetConfirm").hidden = true; renderHome(); });
+
+  renderHome();
+})();
+</script>
